@@ -28,6 +28,12 @@ module CommerceEventLedger
     # Common ones are `templates`, `generators`, or `middleware`, for example.
     config.autoload_lib(ignore: %w[assets tasks])
 
+    # Packwerk public_path defines visibility, not Rails autoload roots.
+    Dir[root.join("packages/*/app/{public,internal,models,services,jobs,controllers}")].sort.each do |path|
+      config.autoload_paths << path
+      config.eager_load_paths << path
+    end
+
     # Configuration for the application, engines, and railties goes here.
     #
     # These settings can be overridden in specific environments using the files
