@@ -3,7 +3,8 @@
 CREATE DATABASE IF NOT EXISTS `commerce_event_ledger_test`
   CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci;
 
-GRANT ALL PRIVILEGES ON `commerce_event_ledger_test`.*
+-- GRANT treats underscores as wildcards unless escaped, even in backticks.
+GRANT ALL PRIVILEGES ON `commerce\_event\_ledger\_test`.*
   TO 'commerce_event_ledger'@'%';
 
 -- There is no global grant and no access to unrelated databases. Tests currently

@@ -56,7 +56,7 @@ jobs:
         run: |
           bin/rubocop
           bin/brakeman --no-pager
-          bin/bundler-audit
+          bin/bundler-audit check --update
       - name: Check tracked source hygiene
         run: |
           python3 script/check_repository.py
@@ -85,6 +85,18 @@ jobs:
           docker compose run --rm app bin/setup
           docker compose run --rm app bin/test
           curl --fail --silent --show-error http://127.0.0.1:3000/up
+      - name: Verify the fixture user cannot access a wildcard-similar database
+        run: |
+          docker compose exec -T db sh -c 'MYSQL_PWD="$MYSQL_ROOT_PASSWORD" mysql --user=root --execute="CREATE DATABASE commerceXeventXledgerXtest"'
+          docker compose exec -T db sh -c 'MYSQL_PWD="$MYSQL_PASSWORD" mysql --host=127.0.0.1 --user="$MYSQL_USER" --database=commerce_event_ledger_test --execute="SELECT 1"'
+          if denial=$(docker compose exec -T db sh -c 'MYSQL_PWD="$MYSQL_PASSWORD" mysql --host=127.0.0.1 --user="$MYSQL_USER" --database=commerceXeventXledgerXtest --execute="SELECT 1"' 2>&1); then
+            echo 'Fixture database grant unexpectedly includes a different database.' >&2
+            exit 1
+          fi
+          case "$denial" in
+            *'ERROR 1044'*) echo 'Verified: unrelated database access denied.' ;;
+            *) printf '%s\n' "$denial" >&2; exit 1 ;;
+          esac
       - name: Inspect container output after a failure
         if: failure()
         run: docker compose logs --no-color

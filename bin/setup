@@ -15,8 +15,8 @@ Dir.chdir(APP_ROOT) do
     abort "bin/setup only prepares development and test databases."
   end
 
-  if ENV.key?("DATABASE_URL")
-    abort "Unset DATABASE_URL before setup; use DB_* with the fixed local development/test databases."
+  if %w[DATABASE_URL PRIMARY_DATABASE_URL].any? { |key| ENV.key?(key) }
+    abort "Unset DATABASE_URL and PRIMARY_DATABASE_URL before setup; use DB_* with the fixed local development/test databases."
   end
 
   unless File.file?("Gemfile.lock")

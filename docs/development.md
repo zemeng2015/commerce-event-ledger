@@ -24,7 +24,7 @@ Run the MySQL-backed tests in the app image:
 docker compose run --rm app ruby bin/test
 ```
 
-`bin/test` sets `RAILS_ENV=test`, checks locked dependencies, prepares the test database, and invokes Rails/Minitest. It accepts normal Rails test arguments after the command. The smoke suite uses a single process and the fixed test database. Later concurrency tests need an explicit connection strategy rather than implicit creation of databases outside the user's grants.
+`bin/test` sets `RAILS_ENV=test`, checks locked dependencies, prepares the test database, and invokes Rails/Minitest. Normal test-file, `--name`, and `--seed` arguments can follow the command. Environment overrides are rejected before dependency checks or database preparation: this includes `-e`, attached short values, `--environment`, long abbreviations such as `--env`, and `=value` forms. The smoke suite uses a single process and the fixed test database. Later concurrency tests need an explicit connection strategy rather than implicit creation of databases outside the user's grants.
 
 To rerun setup without rebuilding or starting another web server:
 
@@ -67,11 +67,11 @@ ruby bin/test
 ruby bin/rails server --binding 127.0.0.1
 ```
 
-Setup checks or installs the locked bundle and uses Rails `db:prepare` for development and test. Both scripts refuse other Rails environments and reject an inherited `DATABASE_URL` before running database commands: a URL can override the database name even under the test environment. Unset it and use the `DB_*` settings above for these fixed local databases. Tests then force the test environment. Neither command installs frontend tooling, starts a worker, clears project folders, or resets databases.
+Setup checks or installs the locked bundle and uses Rails `db:prepare` for development and test. Both scripts refuse other Rails environments and reject an inherited `DATABASE_URL` or `PRIMARY_DATABASE_URL` before dependency checks or database commands: either URL can override the database name even under the test environment. Unset both keys and use the `DB_*` settings above for these fixed local databases. Guard diagnostics name the keys without printing their values. Tests then force the test environment. Neither command installs frontend tooling, starts a worker, clears project folders, or resets databases.
 
 ## Fixture database boundaries and troubleshooting
 
-All passwords committed in the Compose configuration are public disposable fixture values. The MySQL root credential stays inside the database service; Rails uses the dedicated user. The development stack is for synthetic local data and does not configure production access.
+All passwords committed in the Compose configuration are public disposable fixture values. The MySQL root credential stays inside the database service; Rails uses the dedicated user. Underscores in database-specific grants are escaped so they cannot act as wildcards for unrelated database names. The development stack is for synthetic local data and does not configure production access.
 
 The official MySQL image processes `docker/mysql/init.sql` only when its named data volume is initialized for the first time. Editing credentials or grants later does not rewrite an existing volume. Preserve useful fixture data and inspect the database logs/grants before making a deliberate local database change; restarting setup is not a reset mechanism.
 
