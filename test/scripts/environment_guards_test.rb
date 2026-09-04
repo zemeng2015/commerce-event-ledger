@@ -32,7 +32,7 @@ class EnvironmentGuardsTest < ActiveSupport::TestCase
     "bin/test" => "bin/test only runs from a development or test environment."
   }.each do |script, diagnostic|
     test "#{script} rejects the production environment" do
-      output, status = run_script(script, "RAILS_ENV" => "production")
+      output, status = run_script(script, "RAILS_ENV" => "production", "DATABASE_URL" => SENTINEL_URL)
 
       refute status.success?, "#{script} unexpectedly accepted production"
       assert_includes output, diagnostic
@@ -50,7 +50,9 @@ class EnvironmentGuardsTest < ActiveSupport::TestCase
 
   environment_arguments.each do |arguments|
     test "bin/test rejects environment arguments #{arguments.join(" ")}" do
-      output, status = run_script("bin/test", {}, arguments)
+      # If the argument guard regresses, the independent URL guard still stops
+      # this negative case before it can prepare or run a different database.
+      output, status = run_script("bin/test", { "DATABASE_URL" => SENTINEL_URL }, arguments)
 
       refute status.success?, "bin/test unexpectedly accepted an environment override"
       assert_includes output, ARGUMENT_GUARD
