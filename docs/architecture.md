@@ -1,10 +1,10 @@
 # Architecture
 
-Status: Rails/MySQL scaffold implemented; architecture baseline accepted in [ADR-0001](adr/0001-modular-monolith.md); detailed transaction/recovery design proposed in [ADR-0002](adr/0002-acceptance-and-recovery.md). The business schema, four packages, event pipeline, and failure experiments below remain planned.
+Status: Rails/MySQL scaffold and [four-package interface contracts](package-contracts.md) implemented; architecture baseline accepted in [ADR-0001](adr/0001-modular-monolith.md); detailed transaction/recovery design proposed in [ADR-0002](adr/0002-acceptance-and-recovery.md). The business schema, real event pipeline, and failure experiments below remain planned.
 
 ## System boundary
 
-Commerce Event Ledger is a Rails API modular monolith. MySQL is the sole business source of truth. The scaffold pins Ruby 4.0.6, Rails 8.1.3.1 and MySQL 8.4.11 and commits the Bundler resolution. Minitest checks the real database connection and HTTP boot. Active Job/Solid Queue execution, a GraphQL Ruby operator API, and Packwerk package boundaries are the next implementation stages; their dependencies are present, but their behavior is not established by boot tests.
+Commerce Event Ledger is a Rails API modular monolith. MySQL is the sole business source of truth. The scaffold pins Ruby 4.0.6, Rails 8.1.3.1 and MySQL 8.4.11 and commits the Bundler resolution. Minitest checks the real database connection and HTTP boot. Public interface tests and Packwerk checks establish the package boundary; the interface tests use explicit doubles for pending adapters. Active Job/Solid Queue execution and the GraphQL Ruby operator API remain future work.
 
 The first domain effect is a local order projection update. This architecture does not execute payments or write orders/inventory in a merchant's system. The guarantee of one committed database effect is limited to writes enclosed in the same transaction as the effect ledger; it does not extend to network calls or other databases.
 

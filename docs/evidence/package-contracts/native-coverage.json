@@ -1,0 +1,68 @@
+{
+  "scope": "Application and package interfaces; core idempotency and recovery remain pending",
+  "files": {
+    "app/controllers/application_controller.rb": {
+      "branches": 0,
+      "covered_branches": 0
+    },
+    "app/jobs/application_job.rb": {
+      "branches": 0,
+      "covered_branches": 0
+    },
+    "app/models/application_record.rb": {
+      "branches": 0,
+      "covered_branches": 0
+    },
+    "app/services/commerce_event_ledger/composition.rb": {
+      "branches": 4,
+      "covered_branches": 4
+    },
+    "packages/event_ledger/app/internal/event_ledger/contract.rb": {
+      "branches": 33,
+      "covered_branches": 31
+    },
+    "packages/event_ledger/app/public/event_ledger/effect_result.rb": {
+      "branches": 2,
+      "covered_branches": 2
+    },
+    "packages/event_ledger/app/public/event_ledger/envelope.rb": {
+      "branches": 0,
+      "covered_branches": 0
+    },
+    "packages/event_ledger/app/public/event_ledger/event_summary.rb": {
+      "branches": 2,
+      "covered_branches": 2
+    },
+    "packages/event_ledger/app/public/event_ledger/handler_registry.rb": {
+      "branches": 8,
+      "covered_branches": 8
+    },
+    "packages/event_ledger/app/public/event_ledger/persisted_event.rb": {
+      "branches": 2,
+      "covered_branches": 2
+    },
+    "packages/event_ledger/app/public/event_ledger/receipt.rb": {
+      "branches": 0,
+      "covered_branches": 0
+    },
+    "packages/operations/app/public/operations/queries.rb": {
+      "branches": 10,
+      "covered_branches": 10
+    },
+    "packages/orders/app/public/orders/handler.rb": {
+      "branches": 6,
+      "covered_branches": 6
+    },
+    "packages/orders/app/public/orders/order_summary.rb": {
+      "branches": 6,
+      "covered_branches": 5
+    },
+    "packages/webhooks/app/public/webhooks/ingress.rb": {
+      "branches": 14,
+      "covered_branches": 10
+    }
+  },
+  "branches": 87,
+  "covered_branches": 80,
+  "branch_percent": 91.95
+}

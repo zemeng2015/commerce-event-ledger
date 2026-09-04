@@ -4,7 +4,7 @@ Failure-aware webhook ingestion for Rails commerce applications.
 
 Commerce webhooks can arrive twice, late, or out of order. Workers can crash after changing an order but before acknowledging a job. This project is being built to make accepted events recoverable, database effects idempotent, and failures explainable.
 
-**Status: Rails/MySQL scaffold; S1 in progress.** The API boots, exposes `/up`, and has a reproducible Docker development environment with MySQL-backed smoke tests. Webhook ingestion, order processing, GraphQL operations, and reliability guarantees are not implemented yet. The first milestone remains one signed `orders/create` fixture delivered ten times, producing one canonical event and one order effect. See the [roadmap](docs/roadmap.md) and [active development goal](docs/long-term-goal.md).
+**Status: Rails/MySQL scaffold and package contracts; S1 in progress.** The API boots, exposes `/up`, and has a reproducible Docker development environment with MySQL-backed smoke tests and explicit four-package interfaces. Webhook ingestion, order persistence/processing, GraphQL operations, and reliability guarantees are not implemented yet. The first milestone remains one signed `orders/create` fixture delivered ten times, producing one canonical event and one order effect. See the [roadmap](docs/roadmap.md) and [active development goal](docs/long-term-goal.md).
 
 ## Intended guarantees
 
@@ -28,7 +28,7 @@ Signed fixture / optional Shopify development store
     -> Operations: GraphQL status, recovery, and audited replay
 ```
 
-The scaffold uses Ruby 4.0.6, Rails 8.1.3.1, and MySQL 8.4.11. Bundler resolves the committed dependency lockfile; GraphQL Ruby, Solid Queue, Packwerk, and SimpleCov are included for the planned pipeline and its checks. The four business packages, queue persistence, and GraphQL schema remain upcoming work. See [architecture](docs/architecture.md) for boundaries and transaction decisions.
+The scaffold uses Ruby 4.0.6, Rails 8.1.3.1, and MySQL 8.4.11. Bundler resolves the committed dependency lockfile; GraphQL Ruby, Solid Queue, Packwerk, and SimpleCov are included for the pipeline and its checks. The [four-package contracts](docs/package-contracts.md) define receipt, exact-version handler dispatch, and tenant-scoped query ports. Authentication, database adapters, queue persistence, and the GraphQL schema remain upcoming work. See [architecture](docs/architecture.md) for boundaries and transaction decisions.
 
 ## Run the scaffold
 
@@ -56,7 +56,7 @@ git diff --check
 
 On Windows, use `python` instead of `python3`. This validates repository files and relative documentation links. It does not run Rails or verify webhook behavior. The Foundation CI workflow runs the same checks on Linux.
 
-Application CI separately runs MySQL smoke tests, script-isolation regressions, Rails autoload checks, lint, dependency/security scans, and a fresh Docker build/startup/repeated-setup path. Current scaffold coverage has no implemented commerce branches; it does not satisfy the v0.1 coverage gate.
+Application CI separately runs MySQL smoke tests, interface composition and redaction tests, script-isolation regressions, Rails autoload checks, strict Packwerk boundaries with negative probes, lint, dependency/security scans, and a fresh Docker build/startup/repeated-setup path. It checks that all application/package sources are loaded for branch measurement. Interface coverage does not satisfy the release's core idempotency/recovery coverage gate.
 
 ## Development and evidence
 
@@ -65,6 +65,7 @@ Application CI separately runs MySQL smoke tests, script-isolation regressions, 
 - [Long-term goal and current state](docs/long-term-goal.md)
 - [Architecture](docs/architecture.md)
 - [Verified scaffold checkpoint](docs/s1-scaffold-checkpoint.md)
+- [Verified package contract checkpoint](docs/s1-package-checkpoint.md)
 - [ADR 0001: modular monolith](docs/adr/0001-modular-monolith.md)
 - [ADR 0002: durable acceptance and recovery](docs/adr/0002-acceptance-and-recovery.md)
 - [Contributing](CONTRIBUTING.md), [security](SECURITY.md), and [changelog](CHANGELOG.md)

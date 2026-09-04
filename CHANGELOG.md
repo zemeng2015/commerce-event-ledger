@@ -14,8 +14,10 @@ All notable changes will be recorded here. No application version has been relea
 - MySQL 8.4.11 Docker development environment, repeatable setup and test entry points.
 - Health/database smoke tests, subprocess database/environment isolation regressions, and a fixture grant boundary check.
 - Application CI for native Rails/MySQL and Docker setup, lint/security checks and coverage artifacts; Bundler and Docker dependency update policies.
+- Four package contracts with immutable redacted values, exact handler-version routing, tenant-scoped query results, and reloadable composition using explicit adapters.
+- Strict Packwerk dependency/privacy enforcement, isolated negative boundary probes, and native/Docker branch measurement checks.
 
 ### Not implemented
 
-- Business packages/schema, webhook endpoint, processing jobs, GraphQL API, and reliability tests.
+- Business schema and adapters, webhook endpoint, processing jobs, GraphQL API, and reliability tests.
 - Demo, benchmark, failure evidence, development-store verification, and release artifacts.
