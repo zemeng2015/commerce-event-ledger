@@ -1,0 +1,26 @@
+name: Bug report
+description: Report a reproducible defect using synthetic data.
+title: "bug: "
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: Do not include secrets or merchant data. Use private security reporting for vulnerabilities.
+  - type: textarea
+    id: scenario
+    attributes:
+      label: Scenario and reproduction
+      description: Include the commit, runtime, commands, and synthetic inputs.
+    validations:
+      required: true
+  - type: textarea
+    id: behavior
+    attributes:
+      label: Expected and observed behavior
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Redacted evidence
+      description: Add relevant test output or minimal logs with sensitive fields removed.
