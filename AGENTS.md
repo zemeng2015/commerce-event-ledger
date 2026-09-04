@@ -4,6 +4,8 @@
 
 This repository is exclusively Commerce Event Ledger. Read `docs/project-charter.md`, `docs/long-term-goal.md`, `docs/roadmap.md`, relevant ADRs, and the current Git diff before work. Keep other projects and personal background outside this public repository.
 
+Before writing, confirm that the checkout's `origin` is `https://github.com/zemeng2015/commerce-event-ledger.git` (or the equivalent SSH URL). Use this isolated checkout, not a shared planning directory used by another project.
+
 The active goal is the complete v0.1 acceptance definition. Completing a task or sprint is a checkpoint, not completion of the goal. Update durable state with actual evidence, unresolved gates, and the next dependency after each accepted increment.
 
 ## Delivery
