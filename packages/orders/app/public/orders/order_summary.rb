@@ -10,6 +10,7 @@ module Orders
       @source = copy_text(source)
       @external_order_id = copy_text(external_order_id)
       @state = copy_text(state)
+      raise ArgumentError, "Invalid order summary" unless @state == "created"
       freeze
     end
 
@@ -18,6 +19,10 @@ module Orders
     end
 
     alias_method :to_s, :inspect
+
+    def as_json(_options = nil)
+      { "type" => self.class.name, "redacted" => true }
+    end
 
     private
 

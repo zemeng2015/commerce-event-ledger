@@ -12,7 +12,9 @@ results = JSON.parse(result_path.read)
 abort "Expected one current test-suite coverage result." unless results.size == 1
 coverage = results.values.first.fetch("coverage")
 
-tracked, status = Open3.capture2("git", "ls-files", "-z", "app", "packages", chdir: root.to_s)
+# Docker's bind mount retains the host UID. Trust only this exact checkout for
+# this read; do not alter the user's global Git ownership policy.
+tracked, status = Open3.capture2("git", "-c", "safe.directory=#{root}", "ls-files", "-z", "app", "packages", chdir: root.to_s)
 abort "Cannot enumerate tracked application sources." unless status.success?
 expected = tracked.split("\0").select do |path|
   path.end_with?(".rb") && (path.start_with?("app/") || path.match?(%r{\Apackages/[^/]+/app/}))

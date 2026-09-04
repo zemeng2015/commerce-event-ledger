@@ -48,5 +48,9 @@ module Orders
     end
 
     alias_method :to_s, :inspect
+
+    def as_json(_options = nil)
+      { "type" => self.class.name, "redacted" => true }
+    end
   end
 end

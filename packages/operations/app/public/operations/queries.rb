@@ -53,6 +53,10 @@ module Operations
 
     alias_method :to_s, :inspect
 
+    def as_json(_options = nil)
+      { "type" => self.class.name, "redacted" => true }
+    end
+
     private
 
     def query_text(value)

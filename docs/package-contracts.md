@@ -23,6 +23,8 @@ Package models must not inherit the root `ApplicationRecord`, which would introd
 
 Value constructors validate shape, copy/freeze nested values, and use redacted inspection and generic validation errors. Constructing a value is not proof of authentication, authorization, or persistence. Those guarantees belong to the adapters and database transactions that will use these contracts.
 
+Event summaries allow only `pending`, `processing`, `retry_wait`, `processed`, and `dead_letter` status strings. The current order-create summary allows only `created`. These are contract vocabularies, not implemented lifecycle transitions; later topics must add any new projected states deliberately. Arbitrary diagnostics or adapter strings must not become operator-visible status/state values. Default JSON serialization is redacted; readers expose the permitted fields explicitly.
+
 `payload_sha256` means SHA-256 of the exact authenticated request bytes. The source adapter computes it before discarding the raw body. A repeated canonical identity with a different digest must produce an explicit conflict rather than replace the stored event. This deliberately distinguishes byte-different deliveries; it does not claim semantic equality after JSON reserialization. The normalized payload's allowlist and source ordering rules are defined in the order-create adapter, not inferred from arbitrary JSON or receipt time.
 
 ## Ports and composition

@@ -26,12 +26,19 @@ module Webhooks
       end
       body = raw_body.dup.freeze
       request_headers = copy_headers(headers)
+      trusted_shop_id = source_configuration.shop_id
+      trusted_source = source_configuration.source
+      unless trusted_shop_id.is_a?(Integer) && trusted_shop_id.positive? &&
+        trusted_source.is_a?(String) && !trusted_source.empty?
+        raise ReceiptError, "Webhook receipt failed"
+      end
+      trusted_source = trusted_source.dup.freeze
       authenticate!(body, request_headers, source_configuration)
 
       envelope = @normalizer.call(raw_body: body, headers: request_headers,
         source_configuration: source_configuration)
       unless envelope.instance_of?(EventLedger::Envelope) &&
-        envelope.shop_id == source_configuration.shop_id && envelope.source == source_configuration.source &&
+        envelope.shop_id == trusted_shop_id && envelope.source == trusted_source &&
         envelope.payload_sha256 == Digest::SHA256.hexdigest(body)
         raise ReceiptError, "Webhook receipt failed"
       end
@@ -46,7 +53,7 @@ module Webhooks
       end
       receipt
     rescue AuthenticationError
-      raise
+      raise AuthenticationError, "Webhook authentication failed", cause: nil
     rescue StandardError
       raise ReceiptError, "Webhook receipt failed", cause: nil
     end
@@ -56,6 +63,10 @@ module Webhooks
     end
 
     alias_method :to_s, :inspect
+
+    def as_json(_options = nil)
+      { "type" => self.class.name, "redacted" => true }
+    end
 
     private
 

@@ -5,6 +5,11 @@ module CommerceEventLedger
   # are mandatory; this class never invents an in-memory or successful default.
   class Composition
     def initialize(authenticator:, normalizer:, ledger:, effect_executor:, event_reader:, order_reader:)
+      unless authenticator.respond_to?(:call) && normalizer.respond_to?(:call) &&
+        ledger.respond_to?(:receive) && effect_executor.respond_to?(:call) &&
+        event_reader.respond_to?(:find) && order_reader.respond_to?(:find)
+        raise ArgumentError, "Explicit composition collaborators are required"
+      end
       @authenticator = authenticator
       @normalizer = normalizer
       @ledger = ledger
@@ -43,5 +48,9 @@ module CommerceEventLedger
     end
 
     alias_method :to_s, :inspect
+
+    def as_json(_options = nil)
+      { "type" => self.class.name, "redacted" => true }
+    end
   end
 end

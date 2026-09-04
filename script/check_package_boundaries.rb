@@ -11,7 +11,7 @@ require "yaml"
 # Mutate only a disposable copy. Deliberately invalid references never enter
 # the application checkout, its autoloader, or its recorded Packwerk debt.
 root = Pathname.new(__dir__).parent.expand_path
-tracked, status = Open3.capture2("git", "ls-files", "-z", chdir: root.to_s)
+tracked, status = Open3.capture2("git", "-c", "safe.directory=#{root}", "ls-files", "-z", chdir: root.to_s)
 abort "Cannot enumerate tracked application files." unless status.success?
 
 Dir.mktmpdir("commerce-event-ledger-boundaries-") do |directory|

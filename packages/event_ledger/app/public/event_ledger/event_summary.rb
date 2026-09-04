@@ -5,12 +5,15 @@ module EventLedger
   class EventSummary
     include Contract::Redacted
 
+    STATUSES = %w[pending processing retry_wait processed dead_letter].freeze
+
     attr_reader :event_id, :shop_id, :status
 
     def initialize(event_id:, shop_id:, status:)
       @event_id = Contract.positive_id(event_id)
       @shop_id = Contract.positive_id(shop_id)
       @status = Contract.text(status)
+      Contract.invalid! unless STATUSES.include?(@status)
       freeze
     end
   end

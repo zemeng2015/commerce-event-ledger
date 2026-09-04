@@ -9,12 +9,16 @@ module EventLedger
       end
 
       alias_method :to_s, :inspect
+
+      def as_json(_options = nil)
+        { "type" => self.class.name, "redacted" => true }
+      end
     end
 
     module_function
 
     def invalid!
-      raise ArgumentError, "Invalid event contract"
+      raise ArgumentError, "Invalid event contract", cause: nil
     end
 
     def positive_id(value)

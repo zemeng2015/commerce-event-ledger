@@ -65,12 +65,20 @@ class EventValuesTest < ActiveSupport::TestCase
     envelope = EventLedger::Envelope.new(**envelope_attributes.merge(payload: { "values" => scalars }))
 
     scalars.zip(envelope.payload.fetch("values")).each do |original, copy|
-      assert_same original, copy
+      if original.nil?
+        assert_nil copy
+      else
+        assert_same original, copy
+      end
     end
 
     [ nil, 0, 17 ].each do |version|
       value = EventLedger::Envelope.new(**envelope_attributes.merge(source_version: version))
-      assert_same version, value.source_version
+      if version.nil?
+        assert_nil value.source_version
+      else
+        assert_same version, value.source_version
+      end
     end
 
     attributes = envelope_attributes
