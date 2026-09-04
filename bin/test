@@ -1,0 +1,35 @@
+#!/usr/bin/env ruby
+# frozen_string_literal: true
+
+require "rbconfig"
+
+APP_ROOT = File.expand_path("..", __dir__)
+
+Dir.chdir(APP_ROOT) do
+  unless %w[development test].include?(ENV.fetch("RAILS_ENV", "test"))
+    abort "bin/test only runs from a development or test environment."
+  end
+
+  environment_override = ARGV.any? do |argument|
+    option = argument.partition("=").first
+    argument.start_with?("-e") ||
+      (option.start_with?("--") && option.length > 2 && "--environment".start_with?(option))
+  end
+  if environment_override
+    abort "bin/test does not accept environment options; it always uses the test database."
+  end
+
+  if %w[DATABASE_URL PRIMARY_DATABASE_URL].any? { |key| ENV.key?(key) }
+    abort "Unset DATABASE_URL and PRIMARY_DATABASE_URL before tests; use DB_* with the fixed local test database."
+  end
+
+  ENV["RAILS_ENV"] = "test"
+  ENV["BUNDLE_FROZEN"] = "true"
+
+  unless File.file?("Gemfile.lock") && system(RbConfig.ruby, "-S", "bundle", "check")
+    abort "Locked dependencies are missing. Run ruby bin/setup before tests."
+  end
+
+  system(RbConfig.ruby, "bin/rails", "db:prepare", exception: true)
+  exec RbConfig.ruby, "bin/rails", "test", *ARGV
+end

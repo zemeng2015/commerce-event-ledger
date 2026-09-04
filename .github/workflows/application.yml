@@ -1,0 +1,105 @@
+name: Application CI
+
+on:
+  push:
+    branches: [main]
+    paths-ignore:
+      - '**.md'
+  pull_request:
+    paths-ignore:
+      - '**.md'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  rails:
+    name: Rails and MySQL checks
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    services:
+      mysql:
+        image: mysql:8.4.11
+        env:
+          MYSQL_ROOT_PASSWORD: ledger-ci-only
+          MYSQL_DATABASE: commerce_event_ledger_test
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping --silent"
+          --health-interval=5s
+          --health-timeout=5s
+          --health-retries=20
+    env:
+      CI: 'true'
+      RAILS_ENV: test
+      DB_HOST: 127.0.0.1
+      DB_PORT: 3306
+      DB_USERNAME: root
+      DB_PASSWORD: ledger-ci-only
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Install MySQL headers
+        run: sudo apt-get update -qq && sudo apt-get install -y --no-install-recommends libmysqlclient-dev
+      - uses: ruby/setup-ruby@95ef2b042f9d7a56d8268cba8559e2842e2ad01b # v1.321.0
+        with:
+          bundler-cache: true
+      - name: Prepare and test the application
+        run: |
+          bin/setup
+          bin/test
+          bin/rails zeitwerk:check
+      - name: Lint and security checks
+        run: |
+          bin/rubocop
+          bin/brakeman --no-pager
+          bin/bundler-audit check --update
+      - name: Check tracked source hygiene
+        run: |
+          python3 script/check_repository.py
+          git diff --exit-code
+      - name: Upload coverage measurements
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        with:
+          name: rails-coverage
+          path: coverage/
+          include-hidden-files: true
+          retention-days: 7
+          if-no-files-found: warn
+  compose:
+    name: Docker-only developer setup
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Start a fresh developer environment
+        run: docker compose up --build --wait --wait-timeout 240
+      - name: Verify setup can be repeated and tests use MySQL
+        run: |
+          docker compose run --rm app bin/setup
+          docker compose run --rm app bin/test
+          curl --fail --silent --show-error http://127.0.0.1:3000/up
+      - name: Verify the fixture user cannot access a wildcard-similar database
+        run: |
+          docker compose exec -T db sh -c 'MYSQL_PWD="$MYSQL_ROOT_PASSWORD" mysql --user=root --execute="CREATE DATABASE commerceXeventXledgerXtest"'
+          docker compose exec -T db sh -c 'MYSQL_PWD="$MYSQL_PASSWORD" mysql --host=127.0.0.1 --user="$MYSQL_USER" --database=commerce_event_ledger_test --execute="SELECT 1"'
+          if denial=$(docker compose exec -T db sh -c 'MYSQL_PWD="$MYSQL_PASSWORD" mysql --host=127.0.0.1 --user="$MYSQL_USER" --database=commerceXeventXledgerXtest --execute="SELECT 1"' 2>&1); then
+            echo 'Fixture database grant unexpectedly includes a different database.' >&2
+            exit 1
+          fi
+          case "$denial" in
+            *'ERROR 1044'*) echo 'Verified: unrelated database access denied.' ;;
+            *) printf '%s\n' "$denial" >&2; exit 1 ;;
+          esac
+      - name: Inspect container output after a failure
+        if: failure()
+        run: docker compose logs --no-color
+      - name: Stop the disposable environment
+        if: always()
+        run: docker compose down --volumes

@@ -1,12 +1,12 @@
 # Long-term goal
 
-Status: **active — S0 complete; S1 queued**. Repository setup is an initial deliverable; it does not complete this goal. Runtime implementation, integration, failure evidence, and release work remain outstanding. See the [foundation checkpoint](bootstrap-checkpoint.md) for accepted evidence.
+Status: **active — S0 complete; S1 scaffold implemented and under acceptance**. Runtime boot is an initial deliverable; it does not complete this goal. The event pipeline, business integration, failure evidence, and release work remain outstanding. See the [foundation checkpoint](bootstrap-checkpoint.md) for the initial repository evidence and [development setup](development.md) for the current runtime.
 
 ## Objective
 
 Develop and release Commerce Event Ledger `v0.1.0`: an independent, English-first, MIT-licensed Rails API modular monolith that uses MySQL as its sole business source of truth to accept signed commerce webhooks, enforce canonical-event and database-effect idempotency, process at least once, recover from worker and enqueue failures, and support tenant-scoped, audited operations. Prove its stated guarantees with reproducible MySQL-backed correctness tests, failure experiments, real development-store integration, and honest performance results.
 
-The required stack is Rails API, MySQL, Active Job/Solid Queue, GraphQL Ruby, Packwerk, and Minitest. The four business packages are Webhooks, EventLedger, Orders, and Operations. Runtime versions must be verified and locked at scaffold time. See the [charter](project-charter.md) for invariants and [architecture](architecture.md) for the design.
+The required stack is Rails API, MySQL, Active Job/Solid Queue, GraphQL Ruby, Packwerk, and Minitest. The four business packages are Webhooks, EventLedger, Orders, and Operations. Ruby 4.0.6, Rails 8.1.3.1, MySQL 8.4.11 and the resolved gem lockfile are committed. See the [charter](project-charter.md) for invariants and [architecture](architecture.md) for the design.
 
 ## Definition of done
 
@@ -31,12 +31,12 @@ The goal is complete only when all required implementation and evidence exist an
 | Milestone | Completion gate | State |
 | --- | --- | --- |
 | S0 | Establish repository and durable project foundation | Complete — public repository, reviewed docs, passing Foundation CI, ten work items |
-| S1 / `v0.0.1` | Signed order-create vertical slice: ten duplicates, one canonical event, one effect, MySQL-backed checks | Pending |
+| S1 / `v0.0.1` | Signed order-create vertical slice: ten duplicates, one canonical event, one effect, MySQL-backed checks | In progress — scaffold and smoke tests implemented; business path pending |
 | S2 | Concurrency, transactional effect correctness, retry, dead-letter, crash and enqueue-gap recovery, ordering | Pending |
 | S3 | Real integration, GraphQL replay/audit, tenant/redaction verification, observability and experiments | Pending |
 | S4 / `v0.1.0` | All required evidence, release-quality documentation and demo, honest release | Pending |
 
-Next action: start [issue #2: Rails API/MySQL scaffold](https://github.com/zemeng2015/commerce-event-ledger/issues/2), verify dependency compatibility, and establish real MySQL-backed CI. Then implement only `orders/create` through a signed fixture, durable event receipt, asynchronous projection/effect transaction, and tenant-scoped status query. Do not add another event topic until ten duplicate deliveries demonstrably produce one event and one effect.
+Next action: finish acceptance of [issue #2: Rails API/MySQL scaffold](https://github.com/zemeng2015/commerce-event-ledger/issues/2), then implement [issue #5: four package interfaces](https://github.com/zemeng2015/commerce-event-ledger/issues/5) and complete the package checks in issue #4. Continue only `orders/create` through a signed fixture, durable event receipt, asynchronous projection/effect transaction, and tenant-scoped status query. Do not add another event topic until ten duplicate deliveries demonstrably produce one event and one effect.
 
 ## Execution rules
 

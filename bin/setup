@@ -1,0 +1,43 @@
+#!/usr/bin/env ruby
+# frozen_string_literal: true
+
+require "rbconfig"
+
+APP_ROOT = File.expand_path("..", __dir__)
+
+def run!(*command)
+  system(*command, exception: true)
+end
+
+Dir.chdir(APP_ROOT) do
+  environment = ENV.fetch("RAILS_ENV", "development")
+  unless %w[development test].include?(environment)
+    abort "bin/setup only prepares development and test databases."
+  end
+
+  if %w[DATABASE_URL PRIMARY_DATABASE_URL].any? { |key| ENV.key?(key) }
+    abort "Unset DATABASE_URL and PRIMARY_DATABASE_URL before setup; use DB_* with the fixed local development/test databases."
+  end
+
+  unless File.file?("Gemfile.lock")
+    abort "Gemfile.lock is required. Restore the committed lockfile before setup."
+  end
+
+  ENV["RAILS_ENV"] = environment
+  ENV["BUNDLE_FROZEN"] = "true"
+
+  puts "== Checking locked Ruby dependencies =="
+  unless system(RbConfig.ruby, "-S", "bundle", "check")
+    run! RbConfig.ruby, "-S", "bundle", "install"
+  end
+
+  puts "== Preparing #{environment} MySQL database =="
+  run! RbConfig.ruby, "bin/rails", "db:prepare"
+
+  if environment == "development"
+    puts "== Preparing test MySQL database =="
+    run!({ "RAILS_ENV" => "test" }, RbConfig.ruby, "bin/rails", "db:prepare")
+  end
+
+  puts "== Setup complete; existing data was not reset =="
+end

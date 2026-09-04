@@ -1,0 +1,26 @@
+# Development and test use separate, fixed databases on MySQL 8.4 LTS.
+# The default credentials are for disposable local fixtures only.
+default: &default
+  adapter: mysql2
+  encoding: utf8mb4
+  max_connections: <%= ENV.fetch("RAILS_MAX_THREADS") { 5 } %>
+  username: <%= ENV.fetch("DB_USERNAME", "commerce_event_ledger").to_json %>
+  password: <%= ENV.fetch("DB_PASSWORD", "ledger-local-only").to_json %>
+  host: <%= ENV.fetch("DB_HOST") { "127.0.0.1" } %>
+  port: <%= ENV.fetch("DB_PORT", 3306) %>
+
+development:
+  <<: *default
+  database: commerce_event_ledger_development
+
+# Never point test preparation at another environment's database.
+test:
+  <<: *default
+  database: commerce_event_ledger_test
+
+# Production deployment is outside the scaffold milestone. No fixture
+# credentials or default production database are provided.
+production:
+  adapter: mysql2
+  encoding: utf8mb4
+  url: <%= ENV["DATABASE_URL"].to_json %>

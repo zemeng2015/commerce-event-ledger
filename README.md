@@ -4,7 +4,7 @@ Failure-aware webhook ingestion for Rails commerce applications.
 
 Commerce webhooks can arrive twice, late, or out of order. Workers can crash after changing an order but before acknowledging a job. This project is being built to make accepted events recoverable, database effects idempotent, and failures explainable.
 
-**Status: repository foundation.** Application code, runtime setup, benchmarks, and releases are not implemented yet. The first milestone is one signed `orders/create` fixture delivered ten times, producing one canonical event and one order effect. See the [roadmap](docs/roadmap.md) and [active development goal](docs/long-term-goal.md).
+**Status: Rails/MySQL scaffold; S1 in progress.** The API boots, exposes `/up`, and has a reproducible Docker development environment with MySQL-backed smoke tests. Webhook ingestion, order processing, GraphQL operations, and reliability guarantees are not implemented yet. The first milestone remains one signed `orders/create` fixture delivered ten times, producing one canonical event and one order effect. See the [roadmap](docs/roadmap.md) and [active development goal](docs/long-term-goal.md).
 
 ## Intended guarantees
 
@@ -28,22 +28,35 @@ Signed fixture / optional Shopify development store
     -> Operations: GraphQL status, recovery, and audited replay
 ```
 
-Rails API, MySQL, GraphQL Ruby, Solid Queue, Packwerk, Minitest, and Docker Compose form the planned baseline. See [architecture](docs/architecture.md) for boundaries and transaction decisions. Runtime versions and the dependency lockfile will be committed with the executable Rails scaffold.
+The scaffold uses Ruby 4.0.6, Rails 8.1.3.1, and MySQL 8.4.11. Bundler resolves the committed dependency lockfile; GraphQL Ruby, Solid Queue, Packwerk, and SimpleCov are included for the planned pipeline and its checks. The four business packages, queue persistence, and GraphQL schema remain upcoming work. See [architecture](docs/architecture.md) for boundaries and transaction decisions.
 
-## Check this foundation
+## Run the scaffold
 
-Only Git and Python 3.11+ are needed for the current repository check:
+With Git and Docker Compose v2 using Linux containers:
 
 ```sh
 git clone https://github.com/zemeng2015/commerce-event-ledger.git
 cd commerce-event-ledger
+docker compose up --build --wait
+docker compose run --rm app ruby bin/test
+```
+
+The health endpoint is available at `http://127.0.0.1:3000/up`. No host Ruby or MySQL installation is needed for this path. The database is private to the Compose network and uses a dedicated disposable fixture account. See [development setup](docs/development.md) for native Ruby, repeatable setup, and troubleshooting.
+
+`bin/setup` prepares fixed development/test databases without resetting existing data. `bin/test` forces the test environment and rejects database URL and environment overrides. These commands do not yet demonstrate a signed event or one-effect processing. `bin/demo` and `bin/benchmark` remain planned.
+
+## Repository checks
+
+With Python 3.11+:
+
+```sh
 python3 script/check_repository.py
 git diff --check
 ```
 
 On Windows, use `python` instead of `python3`. This validates repository files and relative documentation links. It does not run Rails or verify webhook behavior. The Foundation CI workflow runs the same checks on Linux.
 
-The future application will provide `bin/setup`, `bin/test`, `bin/demo`, and `bin/benchmark`. They will be documented as runnable only when implemented and verified. Offline fixtures will be the default; a live store will not be needed for the local demo.
+Application CI separately runs MySQL smoke tests, script-isolation regressions, Rails autoload checks, lint, dependency/security scans, and a fresh Docker build/startup/repeated-setup path. Current scaffold coverage has no implemented commerce branches; it does not satisfy the v0.1 coverage gate.
 
 ## Development and evidence
 

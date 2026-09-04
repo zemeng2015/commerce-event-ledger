@@ -1,0 +1,28 @@
+# Local synthetic development only. The production image is a separate concern.
+FROM ruby:4.0.6-slim
+
+RUN apt-get update -qq \
+    && apt-get install --no-install-recommends -y \
+      build-essential \
+      ca-certificates \
+      default-libmysqlclient-dev \
+      git \
+      libyaml-dev \
+      pkg-config \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /rails
+
+ENV BUNDLE_FROZEN=true \
+    BUNDLE_JOBS=4 \
+    BUNDLE_RETRY=3
+
+# Install the committed resolution; an out-of-date lockfile must fail the build.
+COPY Gemfile Gemfile.lock .ruby-version ./
+RUN bundle install
+
+COPY . .
+RUN chmod +x bin/rails bin/rake bin/setup bin/test
+
+EXPOSE 3000
+CMD ["ruby", "bin/rails", "server", "--binding", "0.0.0.0", "--pid", "/tmp/commerce-event-ledger.pid"]

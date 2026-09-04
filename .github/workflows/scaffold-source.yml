@@ -1,0 +1,46 @@
+name: Generate Rails scaffold source
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  generate:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    services:
+      mysql:
+        image: mysql:8.4
+        env:
+          MYSQL_ROOT_PASSWORD: ledger-ci-only
+          MYSQL_DATABASE: commerce_event_ledger_test
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping --silent"
+          --health-interval=5s
+          --health-timeout=5s
+          --health-retries=20
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: ruby/setup-ruby@95ef2b042f9d7a56d8268cba8559e2842e2ad01b # v1.321.0
+        with:
+          ruby-version: '4.0.6'
+      - name: Install MySQL build headers
+        run: sudo apt-get update -qq && sudo apt-get install -y --no-install-recommends libmysqlclient-dev
+      - name: Generate and verify upstream Rails source
+        env:
+          DATABASE_URL: mysql2://root:ledger-ci-only@127.0.0.1:3306/commerce_event_ledger_test
+          RAILS_ENV: test
+        run: bash script/generate_rails_scaffold.sh
+      - name: Upload source for review
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        with:
+          name: rails-scaffold-source
+          path: ${{ runner.temp }}/ledger-scaffold-source.tar.gz
+          if-no-files-found: error
+          retention-days: 7

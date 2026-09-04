@@ -1,13 +1,13 @@
 # Roadmap
 
-Status: S0 complete; S1 queued. There is no Rails application or measured runtime behavior yet. Stages are acceptance gates, not automatic calendar deadlines. The original four-week sketch is an estimate for planning; development proceeds according to evidence and available integration access. See the [foundation checkpoint](bootstrap-checkpoint.md).
+Status: S0 complete; S1 in progress. The Rails/MySQL scaffold and its smoke tests are implemented; commerce behavior remains pending. Stages are acceptance gates, not automatic calendar deadlines. The original four-week sketch is an estimate for planning; development proceeds according to evidence and available integration access. See the [foundation checkpoint](bootstrap-checkpoint.md) and [current development setup](development.md).
 
 The project follows the [charter](project-charter.md) and [long-term goal](long-term-goal.md). Only Commerce Event Ledger is in scope.
 
 | Stage | Deliverable | Exit evidence | Current status |
 | --- | --- | --- | --- |
 | S0 — Foundation | Repository, MIT license, contributor and security guidance, charter, architecture, goal, and a focused first backlog | Documentation reviewed; repository prepared for development; planned checks distinguished from runtime checks | Complete; Foundation CI passed and initial backlog created |
-| S1 — First vertical slice | Rails API/MySQL setup, four package boundaries, signed order-create fixture, HMAC ingress, canonical-event constraint, job, order projection/effect, and event query | Clean-clone demo; ten duplicate deliveries yield one canonical event and one database domain effect; MySQL-backed CI; evidence for a `v0.0.1` release | Not started |
+| S1 — First vertical slice | Rails API/MySQL setup, four package boundaries, signed order-create fixture, HMAC ingress, canonical-event constraint, job, order projection/effect, and event query | Clean-clone demo; ten duplicate deliveries yield one canonical event and one database domain effect; MySQL-backed CI; evidence for a `v0.0.1` release | In progress; runtime scaffold and smoke tests implemented, event pipeline pending |
 | S2 — Failure and recovery | Effect transaction proof, bounded retry, dead-letter, recovery, concurrency/crash tests, and explicit out-of-order transitions | 100 sequential and 100 concurrent duplicates produce one effect; acceptance/enqueue-gap and post-effect-crash recovery pass; add updated/cancelled topics only after S1 | Not started |
 | S3 — Integration and operations | Real development-store receipt, tenant-scoped GraphQL inspection and audited replay, JSON logs, traces, metrics, failure/load harness | Redacted real signed-webhook evidence; tenant and redaction checks; trace an event across receipt, attempts, and effect; benchmark environment and raw output | Not started |
 | S4 — Evidence-backed release | Threat model, resolved ADRs, failure matrix, clean-clone rehearsal, demo, security/coverage/stability gates, contributor issues, and `v0.1.0` | All charter correctness and engineering gates pass; performance targets reported honestly; release artifacts cite reproducible evidence | Not started |
@@ -47,4 +47,4 @@ S4 records at least 90% core and 80% overall branch coverage, 20 consecutive sta
 
 ## Next action
 
-Begin S1 with a reproducible Rails API/MySQL scaffold and a test of the empty application's actual database connection. Then implement only the signed order-create vertical slice. Update stage status and evidence links as work completes; do not mark the overall goal complete at S0.
+Finish scaffold acceptance, then implement the four package boundaries and complete CI's boundary checks. Continue the signed order-create vertical slice in the sequence above. Update stage status and evidence links as work completes; startup and smoke tests do not complete S1 or the overall goal.

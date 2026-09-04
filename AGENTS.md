@@ -39,15 +39,17 @@ The active goal is the complete v0.1 acceptance definition. Completing a task or
 
 ## Verification and documentation
 
-Current foundation checks:
+Repository checks:
 
 ```sh
 python3 script/check_repository.py
 git diff --check
 ```
 
-Application commands are not implemented yet. When scaffolding, record exact Ruby/Rails/MySQL versions, add the lockfile and dependency update policy, and implement the documented runtime checks. Disclose dependency additions and architecture changes in the change summary.
+The Ruby 4.0.6 / Rails 8.1.3.1 / MySQL 8.4.11 scaffold and lockfile are implemented. Follow `docs/development.md` for the tested Docker setup. Run `docker compose up --build --wait` and `docker compose run --rm app ruby bin/test`, or use `ruby bin/setup` / `ruby bin/test` with an isolated native MySQL instance. Never bypass the scripts' database URL or environment protections to run against unrelated data.
 
-Future gates include MySQL tests, lint, security/dependency scans, Packwerk, branch coverage, repeated failure scenarios, and a clean-clone demo. Report commands actually run and distinguish environment blockers from test failures. Do not invent passing results, releases, benchmark values, or production scale.
+Application CI checks actual MySQL access, `/up`, script isolation, Docker startup/repeated setup, exact fixture grants, `bin/rails zeitwerk:check`, `bin/rubocop`, `bin/brakeman --no-pager`, and `bin/bundler-audit check --update`. It also records coverage. The four packages and Packwerk enforcement are next; do not claim boundary validation until configuration and negative probes exist. Disclose dependency additions and architecture changes in the change summary.
+
+Future gates include business MySQL tests, Packwerk, meaningful core/overall branch coverage, repeated failure scenarios, and a clean-clone signed-event demo. Scaffold coverage with zero commerce branches is not acceptance evidence for those gates. Report commands actually run and distinguish environment blockers from test failures. Do not invent passing results, releases, benchmark values, or production scale.
 
 Use English for public documentation and issues. Optional Chinese explanations belong in `docs/zh-CN/`. Keep docs consistent with the implemented state.
