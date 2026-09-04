@@ -1,6 +1,6 @@
 # Long-term goal
 
-Status: **active — S0 complete; S1 scaffold implemented and under acceptance**. Runtime boot is an initial deliverable; it does not complete this goal. The event pipeline, business integration, failure evidence, and release work remain outstanding. See the [foundation checkpoint](bootstrap-checkpoint.md) for the initial repository evidence and [development setup](development.md) for the current runtime.
+Status: **active — S0 complete; S1 scaffold accepted, event pipeline pending**. Runtime boot is an initial deliverable; it does not complete this goal. The event pipeline, business integration, failure evidence, and release work remain outstanding. See the [foundation checkpoint](bootstrap-checkpoint.md), [scaffold acceptance](s1-scaffold-checkpoint.md), and [development setup](development.md).
 
 ## Objective
 
@@ -36,7 +36,7 @@ The goal is complete only when all required implementation and evidence exist an
 | S3 | Real integration, GraphQL replay/audit, tenant/redaction verification, observability and experiments | Pending |
 | S4 / `v0.1.0` | All required evidence, release-quality documentation and demo, honest release | Pending |
 
-Next action: finish acceptance of [issue #2: Rails API/MySQL scaffold](https://github.com/zemeng2015/commerce-event-ledger/issues/2), then implement [issue #5: four package interfaces](https://github.com/zemeng2015/commerce-event-ledger/issues/5) and complete the package checks in issue #4. Continue only `orders/create` through a signed fixture, durable event receipt, asynchronous projection/effect transaction, and tenant-scoped status query. Do not add another event topic until ten duplicate deliveries demonstrably produce one event and one effect.
+Next action: implement [issue #5: four package interfaces](https://github.com/zemeng2015/commerce-event-ledger/issues/5) and complete the package checks in issue #4. [Issue #2: Rails API/MySQL scaffold](https://github.com/zemeng2015/commerce-event-ledger/issues/2) is accepted and merged. Continue only `orders/create` through a signed fixture, durable event receipt, asynchronous projection/effect transaction, and tenant-scoped status query. Do not add another event topic until ten duplicate deliveries demonstrably produce one event and one effect.
 
 ## Execution rules
 

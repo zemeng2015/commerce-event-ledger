@@ -64,6 +64,7 @@ Application CI separately runs MySQL smoke tests, script-isolation regressions, 
 - [Milestones and acceptance gates](docs/roadmap.md)
 - [Long-term goal and current state](docs/long-term-goal.md)
 - [Architecture](docs/architecture.md)
+- [Verified scaffold checkpoint](docs/s1-scaffold-checkpoint.md)
 - [ADR 0001: modular monolith](docs/adr/0001-modular-monolith.md)
 - [ADR 0002: durable acceptance and recovery](docs/adr/0002-acceptance-and-recovery.md)
 - [Contributing](CONTRIBUTING.md), [security](SECURITY.md), and [changelog](CHANGELOG.md)

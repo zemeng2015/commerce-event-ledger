@@ -1,6 +1,6 @@
 # Roadmap
 
-Status: S0 complete; S1 in progress. The Rails/MySQL scaffold and its smoke tests are implemented; commerce behavior remains pending. Stages are acceptance gates, not automatic calendar deadlines. The original four-week sketch is an estimate for planning; development proceeds according to evidence and available integration access. See the [foundation checkpoint](bootstrap-checkpoint.md) and [current development setup](development.md).
+Status: S0 complete; S1 in progress. The Rails/MySQL scaffold is accepted and merged; commerce behavior remains pending. Stages are acceptance gates, not automatic calendar deadlines. The original four-week sketch is an estimate for planning; development proceeds according to evidence and available integration access. See the [foundation checkpoint](bootstrap-checkpoint.md), [scaffold acceptance](s1-scaffold-checkpoint.md), and [current development setup](development.md).
 
 The project follows the [charter](project-charter.md) and [long-term goal](long-term-goal.md). Only Commerce Event Ledger is in scope.
 
@@ -47,4 +47,4 @@ S4 records at least 90% core and 80% overall branch coverage, 20 consecutive sta
 
 ## Next action
 
-Finish scaffold acceptance, then implement the four package boundaries and complete CI's boundary checks. Continue the signed order-create vertical slice in the sequence above. Update stage status and evidence links as work completes; startup and smoke tests do not complete S1 or the overall goal.
+Implement the four package boundaries and complete CI's boundary checks, following the accepted scaffold. Continue the signed order-create vertical slice in the sequence above. Update stage status and evidence links as work completes; startup and smoke tests do not complete S1 or the overall goal.
