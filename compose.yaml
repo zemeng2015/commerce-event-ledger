@@ -1,0 +1,61 @@
+services:
+  db:
+    image: mysql:8.4.11
+    # Public, disposable fixture credentials. Never connect this stack to real data.
+    environment:
+      MYSQL_DATABASE: commerce_event_ledger_development
+      MYSQL_USER: commerce_event_ledger
+      MYSQL_PASSWORD: ledger-local-only
+      MYSQL_ROOT_PASSWORD: root-ledger-local-only
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./docker/mysql/init.sql:/docker-entrypoint-initdb.d/01-test-database.sql:ro
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - >-
+          MYSQL_PWD="$$MYSQL_PASSWORD" mysql --protocol=TCP --host=127.0.0.1
+          --user="$$MYSQL_USER" --database=commerce_event_ledger_test
+          --execute="SELECT 1" --silent
+      interval: 5s
+      timeout: 5s
+      retries: 30
+      start_period: 20s
+    # MySQL stays on the Compose network; no database port is published.
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    environment:
+      RAILS_ENV: development
+      DB_HOST: db
+      DB_PORT: "3306"
+      DB_USERNAME: commerce_event_ledger
+      DB_PASSWORD: ledger-local-only
+      RAILS_MAX_THREADS: "${RAILS_MAX_THREADS:-5}"
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      - .:/rails
+    ports:
+      - "127.0.0.1:${APP_PORT:-3000}:3000"
+    command:
+      - sh
+      - -c
+      - ruby bin/setup && exec ruby bin/rails server --binding 0.0.0.0 --pid /tmp/commerce-event-ledger.pid
+    healthcheck:
+      test:
+        - CMD
+        - ruby
+        - -rnet/http
+        - -e
+        - "exit(Net::HTTP.get_response(URI('http://127.0.0.1:3000/up')).is_a?(Net::HTTPSuccess) ? 0 : 1)"
+      interval: 5s
+      timeout: 5s
+      retries: 30
+      start_period: 30s
+
+volumes:
+  mysql_data:

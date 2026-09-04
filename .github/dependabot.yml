@@ -5,4 +5,13 @@ updates:
     schedule:
       interval: weekly
     open-pull-requests-limit: 3
-# Add Bundler after the Rails scaffold commits Gemfile and Gemfile.lock.
+  - package-ecosystem: bundler
+    directory: /
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 3
+  - package-ecosystem: docker
+    directory: /
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 3
