@@ -1,6 +1,6 @@
 # ADR-0001: Rails modular monolith with MySQL business truth
 
-- Status: **Accepted as the architecture baseline; not yet implemented**
+- Status: **Accepted as the architecture baseline; Rails/MySQL scaffold implemented, business boundaries pending**
 - Date: 2026-09-04
 - Scope: Commerce Event Ledger v0.1
 
@@ -16,7 +16,7 @@ Limit the business design to four packages: Webhooks authenticates and normalize
 
 Keep canonical events, attempts, effects, projections, and operator audits in the business database. In particular, projection mutation and effect identity must commit atomically in one MySQL transaction. Queue records are scheduling data; their database placement must not be treated as evidence that receipt and enqueue are atomic.
 
-Verify supported runtime/library compatibility when scaffolding, then commit version files and the dependency lockfile. This ADR intentionally does not invent currently installed or tested versions.
+The scaffold commits Ruby 4.0.6, Rails 8.1.3.1 and the Bundler-resolved lockfile and runs against MySQL 8.4.11. The four-package configuration, production queue persistence and business interfaces must still be implemented and verified.
 
 ## Alternatives considered
 
@@ -33,6 +33,6 @@ MySQL availability, worker scheduling, queue lag, and recovery timing remain ope
 
 ## Validation plan
 
-S1 must run the signed order-create path through the real Rails/MySQL application with ten duplicate deliveries and one effect. CI must report zero Packwerk violations. Later failure experiments must verify the stronger [charter gates](../project-charter.md#completion-criteria). No validation result exists at S0.
+S1 must run the signed order-create path through the real Rails/MySQL application with ten duplicate deliveries and one effect. CI must report zero Packwerk violations. The current [development environment](../development.md) supports boot and MySQL smoke tests; those do not prove the domain invariants. Later failure experiments must verify the stronger [charter gates](../project-charter.md#completion-criteria).
 
 See [architecture](../architecture.md) and [ADR-0002](0002-acceptance-and-recovery.md).

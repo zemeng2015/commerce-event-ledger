@@ -1,6 +1,6 @@
 # Contributing
 
-The repository is establishing its foundation. The first runnable increment covers one signed order-create fixture, canonical event deduplication, background processing, and one order effect. Read the [roadmap](docs/roadmap.md) before adding features.
+The Rails/MySQL scaffold is implemented. The next product increment covers one signed order-create fixture, canonical event deduplication, background processing, and one order effect. Read the [roadmap](docs/roadmap.md) before adding features.
 
 ## Working on a change
 
@@ -16,9 +16,11 @@ Current verification is:
 ```sh
 python3 script/check_repository.py
 git diff --check
+docker compose up --build --wait
+docker compose run --rm app ruby bin/test
 ```
 
-On Windows, `python` can replace `python3`. Ruby/MySQL integration checks will be introduced with the application scaffold. A successful foundation check says nothing about application correctness.
+On Windows, `python` can replace `python3`. See [development setup](docs/development.md) for native Ruby and fixture database details. Application CI also runs autoload, lint and security scans. A successful repository check alone says nothing about application correctness; passing scaffold tests does not establish webhook reliability.
 
 ## Review expectations
 

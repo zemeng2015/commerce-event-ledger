@@ -79,7 +79,7 @@ def main():
         print("\n".join(errors), file=sys.stderr)
         return 1
     print(f"PASS: {len(files)} tracked files; {checked_links} relative file links checked.")
-    print("Foundation checks only; Rails/MySQL behavior has not been tested.")
+    print("Repository checks only; use Application CI to validate Rails/MySQL behavior.")
     return 0
 
 

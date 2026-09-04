@@ -1,11 +1,6 @@
 name: Generate Rails scaffold source
 
 on:
-  push:
-    branches: [codex/s1-rails-foundation]
-    paths:
-      - .github/workflows/scaffold-source.yml
-      - script/generate_rails_scaffold.sh
   workflow_dispatch:
 
 permissions:
