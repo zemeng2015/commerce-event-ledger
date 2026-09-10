@@ -1,6 +1,6 @@
 # Package contracts
 
-These contracts define the in-process order-create boundary. Composition tests use explicit test doubles; separate [fixture and normalization tests](fixtures.md) exercise the real source adapter and publisher. The [HTTP receipt adapter](http-receipt.md) now implements authentication and canonical persistence. Effect processing and recovery remain pending; interface tests alone do not establish their guarantees.
+These contracts define the in-process order-create boundary. Composition tests use explicit test doubles; separate [fixture and normalization tests](fixtures.md) exercise the real source adapter and publisher. The [HTTP receipt adapter](http-receipt.md) now implements authentication and canonical persistence. The [processing implementation](processing.md) adds MySQL-backed effects and initial recovery; interface tests alone do not establish their guarantees.
 
 ## Dependency direction
 
@@ -23,7 +23,7 @@ Package models must not inherit the root `ApplicationRecord`, which would introd
 
 Value constructors validate shape, copy/freeze nested values, and use redacted inspection and generic validation errors. Constructing a value is not proof of authentication, authorization, or persistence. Those guarantees belong to the adapters and database transactions that will use these contracts.
 
-Event summaries allow only `pending`, `processing`, `retry_wait`, `processed`, and `dead_letter` status strings. The current order-create summary allows only `created`. These are contract vocabularies, not implemented lifecycle transitions; later topics must add any new projected states deliberately. Arbitrary diagnostics or adapter strings must not become operator-visible status/state values. Default JSON serialization is redacted; readers expose the permitted fields explicitly.
+Event summaries allow only `pending`, `processing`, `retry_wait`, `processed`, and `dead_letter` status strings. The current order-create summary allows only `created`. The processing store implements these lifecycle states; later topics must add any new projected states deliberately. Arbitrary diagnostics or adapter strings must not become operator-visible status/state values. Default JSON serialization is redacted; readers expose the permitted fields explicitly.
 
 `payload_sha256` means SHA-256 of the exact authenticated request bytes. The source adapter computes it before discarding the raw body. A repeated canonical identity with a different digest must produce an explicit conflict rather than replace the stored event. This deliberately distinguishes byte-different deliveries; it does not claim semantic equality after JSON reserialization. The normalized payload's allowlist and source ordering rules are defined in the order-create adapter, not inferred from arbitrary JSON or receipt time.
 
@@ -37,9 +37,11 @@ Event summaries allow only `pending`, `processing`, `retry_wait`, `processed`, a
 
 The concrete method signatures and test-only examples live in `test/contracts`. Cross-package method behavior is verified by those integration tests because Packwerk checks constant references, not calls through injected objects.
 
+`EventLedger::ProcessingStore` binds a tenant for claim and lifecycle writes; its bounded recovery scan returns server-owned tenant/event pairs. `EventLedger::Claim` carries the persisted event and in-memory ownership token; MySQL stores only its digest. `Orders::EffectExecutor` implements the projection/effect transaction. Root jobs compose these public interfaces.
+
 ## Ownership and transaction sequence
 
-Orders owns private `OrderProjection` and `ProcessedEffect` models. EventLedger owns canonical receipts, processing attempts, claims, and lifecycle acknowledgment. The planned worker sequence is:
+Orders owns private `OrderProjection` and `ProcessedEffect` models. EventLedger owns canonical receipts, processing attempts, claims, and lifecycle acknowledgment. The implemented worker sequence is:
 
 ```text
 EventLedger claim transaction
@@ -53,7 +55,7 @@ EventLedger acknowledgment transaction
   compare the current claim token before changing lifecycle state
 ```
 
-No encompassing EventLedger transaction may swallow the Orders commit. No effect marker may commit independently of its projection change. Database tests must prove both constraints when those models are introduced. A failure before the Orders commit rolls back both writes; a failure after that commit leaves the effect intact so a retry can return its result before acknowledging the current claim. A stale worker must not acknowledge or fail a newer claim.
+No encompassing EventLedger transaction may swallow the Orders commit. No effect marker may commit independently of its projection change. MySQL integration tests prove rollback and rejection of enclosing transactions. A failure before the Orders commit rolls back both writes; a failure after that commit leaves the effect intact so a retry can return its result before acknowledging the current claim. A stale worker must not acknowledge or fail a newer claim.
 
 The chosen handler name/version belongs to the canonical event, not to a replay request or mutable runtime default. Processing resolves that stored identity. If the deployed code cannot resolve it, processing fails explicitly rather than substituting a new version. A future migration to a new effect identity requires a separate reviewed domain change.
 
@@ -73,4 +75,4 @@ bin/test
 
 The probe copies tracked application files into a disposable directory. It verifies permitted public access and deliberately rejects private access, an undeclared dependency, and a dependency cycle. It never alters manifests or creates invalid references in the real checkout.
 
-Strict dependency/privacy enforcement prevents new recorded exceptions. Static analysis still cannot prove dynamic method contracts, tenant authorization, SQL transaction ownership, or all metaprogramming behavior. Those require the focused contract tests now and real MySQL/HTTP/failure tests in subsequent issues. Coverage here measures interface branches; core idempotency and recovery coverage remain pending.
+Strict dependency/privacy enforcement prevents new recorded exceptions. Static analysis still cannot prove dynamic method contracts, tenant authorization, SQL transaction ownership, or all metaprogramming behavior. Those require the focused contracts and MySQL/HTTP tests, plus the remaining forced-crash experiments. Coverage here measures interface branches; core idempotency and recovery coverage remain pending.

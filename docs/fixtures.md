@@ -1,6 +1,6 @@
 # Synthetic order-create fixture
 
-The offline fixture exercises a narrow Shopify `orders/create` contract without customer data or a Shopify account. Normalization and fixture publishing alone do not prove authentication, durable receipt, deduplication, or a committed order effect. The [HTTP receipt implementation](http-receipt.md) adds actual authentication and canonical storage; order effects remain pending.
+The offline fixture exercises a narrow Shopify `orders/create` contract without customer data or a Shopify account. Normalization and fixture publishing alone do not prove authentication, durable receipt, deduplication, or a committed order effect. The [HTTP receipt implementation](http-receipt.md) adds actual authentication and canonical storage; the [processing checkpoint](s1-processing-checkpoint.md) adds asynchronous transactional order effects.
 
 ## Run without a store or database
 
@@ -26,7 +26,7 @@ With the development HTTP receiver running locally, send ten deliveries with:
 ruby bin/publish_fixture --count 10
 ```
 
-The default destination is `http://127.0.0.1:3000/webhooks/shopify/fixture`. For Docker, use `docker compose exec -T app ruby bin/publish_fixture --count 10`. The development receiver commits a canonical pending event before returning `202`. Publisher byte fidelity is also tested against a temporary loopback receiver. The full end-to-end demo must additionally prove a committed order effect, which remains pending.
+The default destination is `http://127.0.0.1:3000/webhooks/shopify/fixture`. For Docker, use `docker compose exec -T app ruby bin/publish_fixture --count 10`. The development receiver commits a canonical pending event before returning `202`. Publisher byte fidelity is also tested against a temporary loopback receiver. The jobs service asynchronously commits the order effect. CI verifies ten deliveries and one effect on a fresh stack; a reusable demo command and clean-clone timing remain pending.
 
 ## Repeatability and transport behavior
 

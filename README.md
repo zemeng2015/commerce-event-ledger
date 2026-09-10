@@ -4,7 +4,7 @@ Failure-aware webhook ingestion for Rails commerce applications.
 
 Commerce webhooks can arrive twice, late, or out of order. Workers can crash after changing an order but before acknowledging a job. This project is being built to make accepted events recoverable, database effects idempotent, and failures explainable.
 
-**Status: signed HTTP receipt and canonical MySQL storage accepted; S1 in progress.** The API boots, exposes `/up`, and has a reproducible Docker environment. The signed order-create receiver validates trusted tenant routing and commits canonical receipts before acknowledgment. Order projections/effects, queue processing, GraphQL operations, and recovery guarantees remain pending. The first milestone remains ten signed deliveries producing one canonical event and one order effect. See the [HTTP receipt contract](docs/http-receipt.md), [roadmap](docs/roadmap.md), and [active development goal](docs/long-term-goal.md).
+**Status: signed HTTP receipt and canonical MySQL storage accepted; S1 in progress.** The API boots, exposes `/up`, and has a reproducible Docker environment. The signed order-create receiver validates trusted tenant routing and commits canonical receipts before acknowledgment. Queued order processing now demonstrates ten signed deliveries producing one canonical event and one transactional order effect. GraphQL operations and full crash-recovery acceptance remain pending. See the [processing checkpoint](docs/s1-processing-checkpoint.md). See the [HTTP receipt contract](docs/http-receipt.md), [roadmap](docs/roadmap.md), and [active development goal](docs/long-term-goal.md).
 
 ## Intended guarantees
 
@@ -28,7 +28,7 @@ Signed fixture / optional Shopify development store
     -> Operations: GraphQL status, recovery, and audited replay
 ```
 
-The scaffold uses Ruby 4.0.6, Rails 8.1.3.1, and MySQL 8.4.11. Bundler resolves the committed dependency lockfile; GraphQL Ruby, Solid Queue, Packwerk, and SimpleCov are included for the pipeline and its checks. The [four-package contracts](docs/package-contracts.md) define receipt, exact-version handler dispatch, and tenant-scoped query ports. Queue persistence, effect processing, and the GraphQL schema remain upcoming work. See [architecture](docs/architecture.md) for boundaries and transaction decisions.
+The scaffold uses Ruby 4.0.6, Rails 8.1.3.1, and MySQL 8.4.11. Bundler resolves the committed dependency lockfile; GraphQL Ruby, Solid Queue, Packwerk, and SimpleCov are included for the pipeline and its checks. The [four-package contracts](docs/package-contracts.md) define receipt, exact-version handler dispatch, and tenant-scoped query ports. Queue persistence and transactional effect processing are implemented; the GraphQL schema remains upcoming work. See [architecture](docs/architecture.md) for boundaries and transaction decisions.
 
 ## Run the scaffold
 
@@ -45,7 +45,7 @@ The health endpoint is available at `http://127.0.0.1:3000/up`. No host Ruby or 
 
 `bin/setup` prepares fixed development/test databases without resetting existing data. `bin/test` forces the test environment and rejects database URL and environment overrides. These commands do not demonstrate durable event receipt or one-effect processing. `bin/demo` and `bin/benchmark` remain planned.
 
-With Ruby 4.0.6, `ruby bin/publish_fixture --dry-run` signs the synthetic fixture without Rails, MySQL, or network access. With the Docker application running, `docker compose exec -T app ruby bin/publish_fixture --count 10` sends ten deliveries to its actual HTTP receiver. See the [fixture commands and normalization contract](docs/fixtures.md). Receipt does not yet create an order projection or domain effect.
+With Ruby 4.0.6, `ruby bin/publish_fixture --dry-run` signs the synthetic fixture without Rails, MySQL, or network access. With the Docker application running, `docker compose exec -T app ruby bin/publish_fixture --count 10` sends ten deliveries to its actual HTTP receiver. See the [fixture commands and normalization contract](docs/fixtures.md). The jobs service processes the receipt asynchronously. The [processing checkpoint](docs/s1-processing-checkpoint.md) records the verified one-effect demonstration and its limits.
 
 ## Repository checks
 

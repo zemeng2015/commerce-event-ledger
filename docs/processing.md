@@ -1,6 +1,6 @@
 # Order-create processing
 
-Implementation in progress for issue #9; MySQL and worker acceptance evidence is pending.
+Implemented for issue #9. The [verified checkpoint](s1-processing-checkpoint.md) records native MySQL, Docker, and twenty graceful worker restart checks; forced-crash acceptance remains pending.
 
 Active Job uses the already-locked Solid Queue 1.7.0 adapter. Its tables share the primary MySQL database, using the gem's default inherited connection. Queue insertion happens only after the receipt adapter returns from its committed transaction. Sharing a database does not make receipt and enqueue atomic. A failed enqueue retains a pending event; Solid Queue's recurring scheduler requests a bounded recovery scan every minute.
 

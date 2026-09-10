@@ -1,6 +1,6 @@
 # ADR-0002: Durable acceptance, transactional effects, and stale-work recovery
 
-- Status: **Proposed — implementation and failure evidence pending**
+- Status: **Proposed — initial implementation verified; full failure evidence pending**
 - Date: 2026-09-04
 - Scope: Receipt acknowledgment, processing idempotency, and recovery
 

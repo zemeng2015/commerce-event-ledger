@@ -1,6 +1,6 @@
 # Long-term goal
 
-Status: **active — S0 complete; S1 signed HTTP and canonical MySQL receipt accepted; processing/effects pending**. These increments do not complete this goal. Business processing, integration, failure recovery, and release work remain outstanding. See the [receipt acceptance](s1-receipt-checkpoint.md), earlier [fixture acceptance](s1-fixture-checkpoint.md), and [development setup](development.md).
+Status: **active — S0 complete; S1 queued order-create processing verified; status queries and packaged demo pending**. These increments do not complete this goal. Status queries, integration, full failure recovery evidence, and release work remain outstanding. See the [processing checkpoint](s1-processing-checkpoint.md). See the [receipt acceptance](s1-receipt-checkpoint.md), earlier [fixture acceptance](s1-fixture-checkpoint.md), and [development setup](development.md).
 
 ## Objective
 
@@ -31,12 +31,12 @@ The goal is complete only when all required implementation and evidence exist an
 | Milestone | Completion gate | State |
 | --- | --- | --- |
 | S0 | Establish repository and durable project foundation | Complete — public repository, reviewed docs, passing Foundation CI, ten work items |
-| S1 / `v0.0.1` | Signed order-create vertical slice: ten duplicates, one canonical event, one effect, MySQL-backed checks | In progress — signed HTTP receipt and canonical storage accepted; queue processing, order effects, and queries pending |
+| S1 / `v0.0.1` | Signed order-create vertical slice: ten duplicates, one canonical event, one effect, MySQL-backed checks | In progress — receipt, queue processing and transactional order effects verified; queries and packaged demo pending |
 | S2 | Concurrency, transactional effect correctness, retry, dead-letter, crash and enqueue-gap recovery, ordering | Pending |
 | S3 | Real integration, GraphQL replay/audit, tenant/redaction verification, observability and experiments | Pending |
 | S4 / `v0.1.0` | All required evidence, release-quality documentation and demo, honest release | Pending |
 
-Next action: implement [issue #9: asynchronous processing and transactional order effects](https://github.com/zemeng2015/commerce-event-ledger/issues/9). HTTP authentication (#7) and canonical receipt (#8) are accepted; the [receipt checkpoint](s1-receipt-checkpoint.md) records 117 passing tests in each environment, 20 receipt race repetitions, and the remaining limits. Continue only `orders/create` through asynchronous projection/effect processing and tenant-scoped status queries. Do not add another topic until ten duplicate deliveries demonstrably produce one event and one effect.
+Next action: implement [issue #10: tenant-scoped GraphQL event status](https://github.com/zemeng2015/commerce-event-ledger/issues/10), then package the repeatable demo in #11. The [processing checkpoint](s1-processing-checkpoint.md) records 128 passing tests in each environment, one-effect HTTP evidence, and twenty graceful worker restarts. These restarts do not satisfy the full forced-crash suite. Continue only `orders/create` until S1 acceptance is complete.
 
 ## Execution rules
 
