@@ -1,6 +1,6 @@
 # S1 HTTP and canonical receipt checkpoint
 
-Date: 2026-09-10. [PR #16](https://github.com/zemeng2015/commerce-event-ledger/pull/16) implements issues [#7](https://github.com/zemeng2015/commerce-event-ledger/issues/7) and [#8](https://github.com/zemeng2015/commerce-event-ledger/issues/8). Verified implementation head: `42c6615f7b6143169aaa139115f1e4c340be9a8a`.
+Date: 2026-09-10. [PR #16](https://github.com/zemeng2015/commerce-event-ledger/pull/16) merged as `5e10ec52e4af2ac2a18a64fca939a1ce0da8503e`, completing issues [#7](https://github.com/zemeng2015/commerce-event-ledger/issues/7) and [#8](https://github.com/zemeng2015/commerce-event-ledger/issues/8). Verified implementation head: `42c6615f7b6143169aaa139115f1e4c340be9a8a`. Final documentation head `ab5a4c586f45b257343525652025f36a7ba5dc9b` also passed [Application CI 34496498871](https://github.com/zemeng2015/commerce-event-ledger/actions/runs/34496498871) and Foundation CI before merging; its tree matches the merge.
 
 ## Evidence
 
