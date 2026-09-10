@@ -4,7 +4,7 @@ Failure-aware webhook ingestion for Rails commerce applications.
 
 Commerce webhooks can arrive twice, late, or out of order. Workers can crash after changing an order but before acknowledging a job. This project is being built to make accepted events recoverable, database effects idempotent, and failures explainable.
 
-**Status: Rails/MySQL scaffold and package contracts; S1 in progress.** The API boots, exposes `/up`, and has a reproducible Docker development environment with MySQL-backed smoke tests and explicit four-package interfaces. Webhook ingestion, order persistence/processing, GraphQL operations, and reliability guarantees are not implemented yet. The first milestone remains one signed `orders/create` fixture delivered ten times, producing one canonical event and one order effect. See the [roadmap](docs/roadmap.md) and [active development goal](docs/long-term-goal.md).
+**Status: scaffold, package contracts, and signed fixture tooling; S1 in progress.** The API boots, exposes `/up`, and has a reproducible Docker environment. A standalone publisher signs exact fixture bytes, and a strict adapter normalizes order-create data. HTTP webhook ingestion, order persistence/processing, GraphQL operations, and reliability guarantees are not implemented yet. The first milestone remains ten signed deliveries producing one canonical event and one order effect. See the [roadmap](docs/roadmap.md) and [active development goal](docs/long-term-goal.md).
 
 ## Intended guarantees
 
@@ -43,7 +43,9 @@ docker compose run --rm app ruby bin/test
 
 The health endpoint is available at `http://127.0.0.1:3000/up`. No host Ruby or MySQL installation is needed for this path. The database is private to the Compose network and uses a dedicated disposable fixture account. See [development setup](docs/development.md) for native Ruby, repeatable setup, and troubleshooting.
 
-`bin/setup` prepares fixed development/test databases without resetting existing data. `bin/test` forces the test environment and rejects database URL and environment overrides. These commands do not yet demonstrate a signed event or one-effect processing. `bin/demo` and `bin/benchmark` remain planned.
+`bin/setup` prepares fixed development/test databases without resetting existing data. `bin/test` forces the test environment and rejects database URL and environment overrides. These commands do not demonstrate durable event receipt or one-effect processing. `bin/demo` and `bin/benchmark` remain planned.
+
+With Ruby 4.0.6, `ruby bin/publish_fixture --dry-run` signs the synthetic fixture without Rails, MySQL, or network access. See the [fixture commands and normalization contract](docs/fixtures.md). Actual local publishing requires the HTTP receiver, which is not implemented yet.
 
 ## Repository checks
 

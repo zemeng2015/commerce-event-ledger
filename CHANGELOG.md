@@ -6,6 +6,9 @@ All notable changes will be recorded here. No application version has been relea
 
 ### Added
 
+- Synthetic exact-byte HMAC fixture publisher with a database-independent dry run and loopback HTTP tests.
+- Strict order-create normalization with trusted source configuration, opaque event identity preservation, bounded unambiguous JSON, and a minimal payload allowlist.
+
 - Product charter, long-term goal, staged roadmap, and architecture decision records.
 - MIT license, contributor guidance, security policy, code of conduct, and contribution templates.
 - Repository checks for required files, UTF-8 text, merge markers, and relative documentation links.

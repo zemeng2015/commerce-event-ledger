@@ -3,7 +3,7 @@ ENV["RAILS_ENV"] ||= "test"
 require "simplecov"
 SimpleCov.start "rails" do
   enable_coverage :branch
-  track_files "{app,packages}/**/*.rb"
+  track_files "{app,packages,lib}/**/*.rb"
 end
 
 require_relative "../config/environment"
