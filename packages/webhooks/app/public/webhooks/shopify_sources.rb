@@ -36,9 +36,9 @@ module Webhooks
         JSON.parse(env.fetch("LEDGER_SHOPIFY_SOURCES"), object_class: UniqueJsonObject,
           max_nesting: 8, create_additions: false, allow_duplicate_key: true)
       elsif fixture
-        [{ "route_token" => "fixture", "shop_id" => 7,
+        [ { "route_token" => "fixture", "shop_id" => 7,
           "shop_domain" => "commerce-event-ledger-fixture.myshopify.com",
-          "secret" => env.fetch("LEDGER_FIXTURE_SECRET", "ledger-fixture-secret-do-not-use-outside-local") }]
+          "secret" => env.fetch("LEDGER_FIXTURE_SECRET", "ledger-fixture-secret-do-not-use-outside-local") } ]
       else
         raise ConfigurationError
       end

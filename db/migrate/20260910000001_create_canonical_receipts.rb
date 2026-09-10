@@ -26,7 +26,7 @@ class CreateCanonicalReceipts < ActiveRecord::Migration[8.1]
       t.datetime :last_received_at, null: false, precision: 6
       t.timestamps
     end
-    add_index :received_events, [:shop_id, :source, :external_event_id], unique: true, name: "canonical_event_identity"
-    add_index :received_events, [:status, :created_at], name: "pending_event_recovery"
+    add_index :received_events, [ :shop_id, :source, :external_event_id ], unique: true, name: "canonical_event_identity"
+    add_index :received_events, [ :status, :created_at ], name: "pending_event_recovery"
   end
 end

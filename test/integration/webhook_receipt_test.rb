@@ -54,13 +54,13 @@ class WebhookReceiptTest < ActiveSupport::TestCase
     end
     10.times { ready.pop }
     10.times { start << true }
-    assert_equal [202] * 10, workers.map(&:value)
+    assert_equal [ 202 ] * 10, workers.map(&:value)
     assert_equal 1, count
     assert_equal 10, rows.first.fetch("deliveries_count")
   end
 
   test "invalid signatures and altered exact bytes do not register a tenant or event" do
-    [nil, "", "bad", Base64.strict_encode64("x" * 32), Base64.strict_encode64("x" * 31)].each do |signature|
+    [ nil, "", "bad", Base64.strict_encode64("x" * 32), Base64.strict_encode64("x" * 31) ].each do |signature|
       assert_equal 401, request(signature: signature).first
     end
     assert_equal 401, request(body: @body + " ", signature: sign(@body)).first
@@ -81,7 +81,7 @@ class WebhookReceiptTest < ActiveSupport::TestCase
     assert_equal 401, request(path: "/webhooks/shopify/#{'c' * 64}").first
     assert_equal 202, request(path: "/webhooks/shopify/#{first_token}").first
     assert_equal 202, request(path: "/webhooks/shopify/#{second_token}", domain: second_domain).first
-    assert_equal [7, 8], rows.map { |row| row.fetch("shop_id") }.sort
+    assert_equal [ 7, 8 ], rows.map { |row| row.fetch("shop_id") }.sort
   end
 
   test "conflicting exact payload cannot replace canonical content or increment accepted duplicates" do

@@ -32,8 +32,8 @@ module Webhooks
       envelope = ShopifyOrderCreate.new.call(raw_body: body, headers: headers, source_configuration: source)
       receipt = EventLedger::ReceiptStore.new(shop_id: source.shop_id, shop_domain: source.shop_domain)
         .receive(envelope: envelope, handler_name: @handler_name, handler_version: @handler_version)
-      [202, { "content-type" => "application/json", "cache-control" => "no-store" },
-        [JSON.generate(event_id: receipt.event_id, duplicate: receipt.duplicate)]]
+      [ 202, { "content-type" => "application/json", "cache-control" => "no-store" },
+        [ JSON.generate(event_id: receipt.event_id, duplicate: receipt.duplicate) ] ]
     rescue ShopifyOrderCreate::NormalizationError
       response(400, "invalid_webhook")
     rescue EventLedger::ReceiptStore::IdentityConflict
@@ -54,8 +54,8 @@ module Webhooks
     private
 
     def response(status, error, headers = {})
-      [status, { "content-type" => "application/json", "cache-control" => "no-store" }.merge(headers),
-        [JSON.generate(error: error)]]
+      [ status, { "content-type" => "application/json", "cache-control" => "no-store" }.merge(headers),
+        [ JSON.generate(error: error) ] ]
     end
   end
 end

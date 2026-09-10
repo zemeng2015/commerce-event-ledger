@@ -24,8 +24,8 @@ module CommerceEventLedger
           handler_version: Orders::Handler::VERSION).call(env)
       end
     rescue StandardError
-      [503, { "content-type" => "application/json", "cache-control" => "no-store" },
-        ['{"error":"unavailable"}']]
+      [ 503, { "content-type" => "application/json", "cache-control" => "no-store" },
+        [ '{"error":"unavailable"}' ] ]
     end
   end
 end
