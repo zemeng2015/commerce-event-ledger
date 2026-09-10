@@ -10,7 +10,7 @@ With Ruby 4.0.6, from the checkout:
 ruby bin/publish_fixture --dry-run
 ```
 
-This validates and signs the committed fixture bytes without sending a request. The JSON summary reports the event identity, byte length, body digest, and requested count. It omits the body, signature, and secret. The publisher uses Ruby's standard libraries and does not boot Rails or connect to MySQL.
+This validates invocation/metadata and signs the committed fixture bytes without sending a request. It does not certify body schema or persistence; normalization tests validate the committed body separately. The JSON summary reports the event identity, byte length, body digest, and requested count. It omits the body, signature, and secret. The publisher uses Ruby's standard libraries and does not boot Rails or connect to MySQL.
 
 The equivalent command in the development image is:
 

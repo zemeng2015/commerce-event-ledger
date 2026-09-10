@@ -68,6 +68,7 @@ Application CI separately runs MySQL smoke tests, interface composition and reda
 - [Architecture](docs/architecture.md)
 - [Verified scaffold checkpoint](docs/s1-scaffold-checkpoint.md)
 - [Verified package contract checkpoint](docs/s1-package-checkpoint.md)
+- [Verified signed fixture checkpoint](docs/s1-fixture-checkpoint.md)
 - [ADR 0001: modular monolith](docs/adr/0001-modular-monolith.md)
 - [ADR 0002: durable acceptance and recovery](docs/adr/0002-acceptance-and-recovery.md)
 - [Contributing](CONTRIBUTING.md), [security](SECURITY.md), and [changelog](CHANGELOG.md)

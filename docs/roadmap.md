@@ -47,4 +47,4 @@ S4 records at least 90% core and 80% overall branch coverage, 20 consecutive sta
 
 ## Next action
 
-Implement the synthetic signed order-create fixture and normalization in issue #6, following the accepted package contracts and CI checks. Continue the vertical slice in the sequence above. Update stage status and evidence links as work completes; interface tests do not complete S1 or the overall goal.
+Implement HTTP HMAC verification and trusted tenant routing in issue #7, following the [accepted signed fixture and normalization](s1-fixture-checkpoint.md). Continue the vertical slice in the sequence above. Update stage status and evidence links as work completes; fixture and normalization tests do not complete S1 or the overall goal.
