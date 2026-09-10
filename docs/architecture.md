@@ -1,6 +1,6 @@
 # Architecture
 
-Status: Rails/MySQL scaffold and [four-package interface contracts](package-contracts.md) implemented; architecture baseline accepted in [ADR-0001](adr/0001-modular-monolith.md); detailed transaction/recovery design proposed in [ADR-0002](adr/0002-acceptance-and-recovery.md). The business schema, real event pipeline, and failure experiments below remain planned.
+Status: Rails/MySQL scaffold, [four-package contracts](package-contracts.md), and [HTTP/canonical receipt](s1-receipt-checkpoint.md) implemented; architecture baseline accepted in [ADR-0001](adr/0001-modular-monolith.md); detailed effect/recovery design proposed in [ADR-0002](adr/0002-acceptance-and-recovery.md). Receipt tables exist; processing, effects, recovery, and the remaining failure experiments below are planned.
 
 ## System boundary
 
