@@ -47,4 +47,4 @@ S4 records at least 90% core and 80% overall branch coverage, 20 consecutive sta
 
 ## Next action
 
-Implement the four package boundaries and complete CI's boundary checks, following the accepted scaffold. Continue the signed order-create vertical slice in the sequence above. Update stage status and evidence links as work completes; startup and smoke tests do not complete S1 or the overall goal.
+Implement the synthetic signed order-create fixture and normalization in issue #6, following the accepted package contracts and CI checks. Continue the vertical slice in the sequence above. Update stage status and evidence links as work completes; interface tests do not complete S1 or the overall goal.

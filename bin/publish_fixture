@@ -1,0 +1,5 @@
+#!/usr/bin/env ruby
+# frozen_string_literal: true
+
+require_relative "../lib/commerce_event_ledger/fixture_publisher"
+exit CommerceEventLedger::FixturePublisher.run(ARGV)
