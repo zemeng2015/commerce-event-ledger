@@ -170,6 +170,20 @@ class OrderProcessingTest < ActiveSupport::TestCase
     refute store.finish(claim: first)
   end
 
+  test "claim tokens remain absent from database diagnostics" do
+    event = persisted_event
+    output = StringIO.new
+    previous_logger = ActiveRecord::Base.logger
+    ActiveRecord::Base.logger = ActiveSupport::Logger.new(output)
+    store = EventLedger::ProcessingStore.new(shop_id: 7)
+    claim = store.claim(event_id: event.event_id)
+    store.fail(claim: claim)
+    refute_includes output.string, claim.token
+    refute_includes claim.to_json, claim.token
+  ensure
+    ActiveRecord::Base.logger = previous_logger
+  end
+
   private
 
   def persisted_event(shop_id: 7, updated_at: "2026-09-04T12:00:00Z", handler_version: "v1")
