@@ -1,10 +1,10 @@
 # Architecture
 
-Status: Rails/MySQL scaffold implemented; architecture baseline accepted in [ADR-0001](adr/0001-modular-monolith.md); detailed transaction/recovery design proposed in [ADR-0002](adr/0002-acceptance-and-recovery.md). The business schema, four packages, event pipeline, and failure experiments below remain planned.
+Status: Rails/MySQL scaffold and [four-package interface contracts](package-contracts.md) implemented; architecture baseline accepted in [ADR-0001](adr/0001-modular-monolith.md); detailed transaction/recovery design proposed in [ADR-0002](adr/0002-acceptance-and-recovery.md). The business schema, real event pipeline, and failure experiments below remain planned.
 
 ## System boundary
 
-Commerce Event Ledger is a Rails API modular monolith. MySQL is the sole business source of truth. The scaffold pins Ruby 4.0.6, Rails 8.1.3.1 and MySQL 8.4.11 and commits the Bundler resolution. Minitest checks the real database connection and HTTP boot. Active Job/Solid Queue execution, a GraphQL Ruby operator API, and Packwerk package boundaries are the next implementation stages; their dependencies are present, but their behavior is not established by boot tests.
+Commerce Event Ledger is a Rails API modular monolith. MySQL is the sole business source of truth. The scaffold pins Ruby 4.0.6, Rails 8.1.3.1 and MySQL 8.4.11 and commits the Bundler resolution. Minitest checks the real database connection and HTTP boot. Public interface tests and Packwerk checks establish the package boundary; the interface tests use explicit doubles for pending adapters. Active Job/Solid Queue execution and the GraphQL Ruby operator API remain future work.
 
 The first domain effect is a local order projection update. This architecture does not execute payments or write orders/inventory in a merchant's system. The guarantee of one committed database effect is limited to writes enclosed in the same transaction as the effect ledger; it does not extend to network calls or other databases.
 
@@ -33,7 +33,7 @@ flowchart TD
 | `Orders` | Order projections, transition policy, handler-level database effects | Implement the handler interface and expose tenant-scoped projection reads. Projection changes and effect records share a MySQL transaction. |
 | `Operations` | Operator authentication/authorization boundary, GraphQL queries and replay, reconciliation entry points, operator audit | Use the packages' public read/lifecycle APIs; require tenant scope and an attributable operator for replay. Must not patch domain tables directly. |
 
-Dependency wiring and handler registration belong in the application composition boundary. Package code must not reach into another package's private models. The initial handler call, transaction owner, and ownership of the `processed_effects` model must be finalized during S1 without splitting its transaction from the projection write. Packwerk must report zero violations; actual public interfaces and tests must support that claim.
+Dependency wiring and handler registration belong in the application composition boundary. Package code must not reach into another package's private models. The [package contracts](package-contracts.md) define immutable receipt/handler values, exact handler registration, tenant-scoped read ports, and the Orders transaction owner. The interface layer requires explicit collaborators; authentication and database implementations remain downstream work. Packwerk must report zero violations and its negative probes must demonstrate enforcement.
 
 ## Planned business schema
 
@@ -61,7 +61,9 @@ Receipt commit and job enqueue are separate boundaries in the proposed first imp
 
 ## Processing and ordering
 
-A worker establishes a bounded claim and creates an inspectable attempt. It then uses the canonical event's tenant and identity to enter the handler path. In a single MySQL business transaction, serialize competing handlers with appropriate locks, inspect the unique effect key, apply the permitted order transition, write the effect outcome, and commit the event's successful lifecycle outcome where possible.
+A worker establishes a bounded claim and creates an inspectable attempt, then commits that claim transaction. It uses the canonical event's tenant and persisted handler identity to enter the handler path. Orders owns the private projection and effect models and a single MySQL transaction to serialize competing handlers, inspect the unique effect key, apply the permitted order transition, and write the effect outcome. EventLedger acknowledges the lifecycle outcome in a subsequent transaction guarded by the current claim token. It must not wrap the Orders transaction in an outer transaction.
+
+Initial canonical receipt durably assigns a handler name/version selected by source/topic. Duplicate receipt, processing, and replay retain that exact identity. The registry must fail explicitly if the deployed code cannot resolve it; selecting a newer version would change the effect key and permit an unintended second effect.
 
 Any uniqueness race or deadlock must be handled as a retryable/re-read path rather than permit the projection write to escape its transaction. A committed effect suppresses repeated application after a queue retry. A crash before commit rolls back both projection and effect; a crash after commit and before job acknowledgment leads to another processing attempt that observes the existing effect.
 

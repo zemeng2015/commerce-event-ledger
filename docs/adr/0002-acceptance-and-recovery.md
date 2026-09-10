@@ -20,7 +20,7 @@ Enqueue via Active Job after receipt commit. Enqueue failure does not erase dura
 
 ### Effect transaction
 
-Use one MySQL business-database transaction for checking/claiming the handler effect key, applying the order transition, writing the effect result, and committing the successful event outcome where possible. Enforce `UNIQUE(event_id, handler_name, handler_version)` in the database. Serialize updates to the same order projection and keep lock ordering consistent.
+Orders owns the private projection and effect models and one MySQL business-database transaction for checking/claiming the handler effect key, applying the order transition, and writing the effect result. Enforce `UNIQUE(event_id, handler_name, handler_version)` in the database. Serialize updates to the same order projection and keep lock ordering consistent. EventLedger commits the claim before invoking Orders, then acknowledges the outcome in a separate claim-token-guarded transaction; no encompassing EventLedger transaction may absorb the Orders commit. The [public contracts](../package-contracts.md) establish this ownership; actual MySQL behavior and crash recovery still require implementation evidence.
 
 An implementation may insert an effect marker before the projection mutation only if the marker and mutation remain uncommitted within that same transaction. A durable success marker must never precede the domain write in a separate transaction. Unique-key conflicts and deadlocks must cause rollback/re-read or bounded retry of the entire relevant unit.
 
@@ -39,6 +39,8 @@ Recovery must run on a documented schedule and after service restart. A durable 
 An operator must be authenticated and authorized for the event's tenant and must provide a reason. Replay records operator, tenant, reason, timestamp, and original event association. Audit recording and the durable replay request need a coherent transaction boundary so a recoverable replay cannot lack its audit.
 
 Replay preserves canonical event identity and handler-version effect identity. It cannot delete the effect record or manufacture a new handler version to force a repeated effect. Attempts remain inspectable; already-processed effects can produce an audited no-op. Handler-version changes require a separate reviewed migration policy.
+
+Canonical receipt assigns the server-selected handler name/version once and persists it. Duplicate receipt retains the existing assignment. Processing and replay resolve that exact deployed handler; a missing version fails explicitly instead of falling back to a newer implementation.
 
 ## Failure experiments required before acceptance
 

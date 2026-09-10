@@ -1,6 +1,6 @@
 # Long-term goal
 
-Status: **active — S0 complete; S1 scaffold accepted, event pipeline pending**. Runtime boot is an initial deliverable; it does not complete this goal. The event pipeline, business integration, failure evidence, and release work remain outstanding. See the [foundation checkpoint](bootstrap-checkpoint.md), [scaffold acceptance](s1-scaffold-checkpoint.md), and [development setup](development.md).
+Status: **active — S0 complete; S1 scaffold and package contracts accepted, event pipeline pending**. Runtime boot and interface checks do not complete this goal. The event pipeline, business integration, failure evidence, and release work remain outstanding. See the [foundation checkpoint](bootstrap-checkpoint.md), [scaffold acceptance](s1-scaffold-checkpoint.md), [package acceptance](s1-package-checkpoint.md), and [development setup](development.md).
 
 ## Objective
 
@@ -31,12 +31,12 @@ The goal is complete only when all required implementation and evidence exist an
 | Milestone | Completion gate | State |
 | --- | --- | --- |
 | S0 | Establish repository and durable project foundation | Complete — public repository, reviewed docs, passing Foundation CI, ten work items |
-| S1 / `v0.0.1` | Signed order-create vertical slice: ten duplicates, one canonical event, one effect, MySQL-backed checks | In progress — scaffold and smoke tests implemented; business path pending |
+| S1 / `v0.0.1` | Signed order-create vertical slice: ten duplicates, one canonical event, one effect, MySQL-backed checks | In progress — scaffold, strict packages, interface tests and CI implemented; business path pending |
 | S2 | Concurrency, transactional effect correctness, retry, dead-letter, crash and enqueue-gap recovery, ordering | Pending |
 | S3 | Real integration, GraphQL replay/audit, tenant/redaction verification, observability and experiments | Pending |
 | S4 / `v0.1.0` | All required evidence, release-quality documentation and demo, honest release | Pending |
 
-Next action: implement [issue #5: four package interfaces](https://github.com/zemeng2015/commerce-event-ledger/issues/5) and complete the package checks in issue #4. [Issue #2: Rails API/MySQL scaffold](https://github.com/zemeng2015/commerce-event-ledger/issues/2) is accepted and merged. Continue only `orders/create` through a signed fixture, durable event receipt, asynchronous projection/effect transaction, and tenant-scoped status query. Do not add another event topic until ten duplicate deliveries demonstrably produce one event and one effect.
+Next action: implement [issue #6: normalized order-create envelope and signed fixture publisher](https://github.com/zemeng2015/commerce-event-ledger/issues/6). The scaffold (#2), package contracts (#5), and CI infrastructure (#4) are accepted; the [package checkpoint](s1-package-checkpoint.md) records 87 passing tests in each environment and the limited scope of interface coverage. Continue only `orders/create` through a signed fixture, durable event receipt, asynchronous projection/effect transaction, and tenant-scoped status query. Do not add another event topic until ten duplicate deliveries demonstrably produce one event and one effect.
 
 ## Execution rules
 

@@ -1,0 +1,11 @@
+require:
+  - packwerk-extensions
+package_paths:
+  - "**/"
+include:
+  - "**/*.{rb,rake,erb}"
+exclude:
+  - "{bin,node_modules,script,tmp,vendor,coverage}/**/*"
+  - "db/**/*"
+cache: false
+parallel: false

@@ -1,6 +1,6 @@
 # ADR-0001: Rails modular monolith with MySQL business truth
 
-- Status: **Accepted as the architecture baseline; Rails/MySQL scaffold implemented, business boundaries pending**
+- Status: **Accepted as the architecture baseline; Rails/MySQL scaffold and package contracts implemented, business persistence pending**
 - Date: 2026-09-04
 - Scope: Commerce Event Ledger v0.1
 
@@ -16,7 +16,7 @@ Limit the business design to four packages: Webhooks authenticates and normalize
 
 Keep canonical events, attempts, effects, projections, and operator audits in the business database. In particular, projection mutation and effect identity must commit atomically in one MySQL transaction. Queue records are scheduling data; their database placement must not be treated as evidence that receipt and enqueue are atomic.
 
-The scaffold commits Ruby 4.0.6, Rails 8.1.3.1 and the Bundler-resolved lockfile and runs against MySQL 8.4.11. The four-package configuration, production queue persistence and business interfaces must still be implemented and verified.
+The scaffold commits Ruby 4.0.6, Rails 8.1.3.1 and the Bundler-resolved lockfile and runs against MySQL 8.4.11. The [four-package configuration and public interfaces](../package-contracts.md) are implemented with strict boundary checks and explicit adapter contracts. Production queue persistence and business adapter behavior must still be implemented and verified.
 
 ## Alternatives considered
 

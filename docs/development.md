@@ -1,6 +1,6 @@
 # Local development
 
-The initial development environment supports Rails API boot and MySQL smoke tests. Webhook ingestion, processing workers, business models, and the signed-event demo are later S1 work; starting this stack does not demonstrate the ledger's reliability guarantees.
+The development environment supports Rails API boot, MySQL smoke tests, and the [four-package interface contracts](package-contracts.md). Real webhook ingestion, processing workers, business models, and the signed-event demo are later S1 work; starting this stack does not demonstrate the ledger's reliability guarantees.
 
 The application uses Ruby 4.0.6, Rails 8.1.3.1, and MySQL 8.4.11 from the 8.4 LTS series. Ruby and Rails dependencies are resolved in the committed lockfile. The development image installs that locked resolution with Bundler frozen mode. The database image is pinned to `mysql:8.4.11`; record its actual digest when retaining experiment results.
 
@@ -78,3 +78,20 @@ The official MySQL image processes `docker/mysql/init.sql` only when its named d
 If the app exits before becoming healthy, inspect `docker compose logs app db`. A failed locked bundle requires a consistent reviewed lockfile; a MySQL authentication failure requires checking the fixed fixture credentials and grants. An occupied app port can be changed with `APP_PORT` in `.env`. Containers call the database service `db`; native Ruby uses its separately provisioned `127.0.0.1` instance.
 
 Runtime CI must validate image construction, healthy app/database startup, repeated setup, and the actual MySQL-backed test suite. A static configuration review alone is not evidence that these checks pass. See the [roadmap](roadmap.md) for the remaining signed-event vertical slice and [charter](project-charter.md) for the complete project gates.
+
+## Package and coverage checks
+
+From the same checkout and development image:
+
+```sh
+docker compose run --rm app bundle exec packwerk validate
+docker compose run --rm app bundle exec packwerk check
+docker compose run --rm app bundle exec ruby script/check_package_boundaries.rb
+docker compose run --rm app bin/rails zeitwerk:check
+docker compose run --rm -e CI=true app bin/test
+docker compose run --rm app ruby script/check_coverage.rb
+```
+
+`CI=true` makes tests eager-load the registered application/package roots in both Docker and native CI. The coverage check requires every tracked application/package source to be loaded and an actual nonzero branch denominator. Raw SimpleCov results and `coverage/branch-summary.json` are retained separately for native and Docker CI. These measurements cover the current interface layer; the release's core idempotency/recovery coverage gate remains pending until those behaviors exist.
+
+The boundary probe operates only on a disposable copy of tracked source. Run it after staging new application files so the copy contains them. It proves permitted public access plus rejected private access, undeclared dependencies, and dependency cycles. No baseline violation file or privacy exception is added to make the check pass.
