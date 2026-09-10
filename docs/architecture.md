@@ -1,6 +1,6 @@
 # Architecture
 
-Status: Rails/MySQL scaffold and [four-package interface contracts](package-contracts.md) implemented; architecture baseline accepted in [ADR-0001](adr/0001-modular-monolith.md); detailed transaction/recovery design proposed in [ADR-0002](adr/0002-acceptance-and-recovery.md). The business schema, real event pipeline, and failure experiments below remain planned.
+Status: Rails/MySQL scaffold, [four-package contracts](package-contracts.md), and [HTTP/canonical receipt](s1-receipt-checkpoint.md) implemented; architecture baseline accepted in [ADR-0001](adr/0001-modular-monolith.md); detailed effect/recovery design proposed in [ADR-0002](adr/0002-acceptance-and-recovery.md). Receipt tables exist; processing, effects, recovery, and the remaining failure experiments below are planned.
 
 ## System boundary
 
@@ -33,7 +33,7 @@ flowchart TD
 | `Orders` | Order projections, transition policy, handler-level database effects | Implement the handler interface and expose tenant-scoped projection reads. Projection changes and effect records share a MySQL transaction. |
 | `Operations` | Operator authentication/authorization boundary, GraphQL queries and replay, reconciliation entry points, operator audit | Use the packages' public read/lifecycle APIs; require tenant scope and an attributable operator for replay. Must not patch domain tables directly. |
 
-Dependency wiring and handler registration belong in the application composition boundary. Package code must not reach into another package's private models. The [package contracts](package-contracts.md) define immutable receipt/handler values, exact handler registration, tenant-scoped read ports, and the Orders transaction owner. The interface layer requires explicit collaborators; authentication and database implementations remain downstream work. Packwerk must report zero violations and its negative probes must demonstrate enforcement.
+Dependency wiring and handler registration belong in the application composition boundary. Package code must not reach into another package's private models. The [package contracts](package-contracts.md) define immutable receipt/handler values, exact handler registration, tenant-scoped read ports, and the Orders transaction owner. The [HTTP receipt adapter](http-receipt.md) supplies trusted tenant configuration, exact-byte HMAC verification, and a committed MySQL canonical receipt. Processing, effects, and recovery remain downstream work. Packwerk must report zero violations and its negative probes must demonstrate enforcement.
 
 ## Planned business schema
 

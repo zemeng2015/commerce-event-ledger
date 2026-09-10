@@ -1,12 +1,11 @@
 ENV["RAILS_ENV"] ||= "test"
 
-require "simplecov"
-SimpleCov.start "rails" do
-  enable_coverage :branch
-  track_files "{app,packages,lib}/**/*.rb"
-end
+require_relative "coverage_boot"
 
 require_relative "../config/environment"
+unless Rails.env.test? && ActiveRecord::Base.connection.select_value("SELECT DATABASE()") == "commerce_event_ledger_test"
+  abort "Tests require the isolated commerce_event_ledger_test database"
+end
 require "rails/test_help"
 
 module ActiveSupport

@@ -1,6 +1,6 @@
 # Local development
 
-The development environment supports Rails API boot, MySQL smoke tests, and the [four-package interface contracts](package-contracts.md). Real webhook ingestion, processing workers, business models, and the signed-event demo are later S1 work; starting this stack does not demonstrate the ledger's reliability guarantees.
+The development environment supports Rails API boot, the [four-package contracts](package-contracts.md), and [signed HTTP/canonical MySQL receipt](http-receipt.md). Processing workers, order projections/effects, and the complete signed-event demo remain later S1 work; starting this stack does not demonstrate the ledger's full reliability guarantees.
 
 The application uses Ruby 4.0.6, Rails 8.1.3.1, and MySQL 8.4.11 from the 8.4 LTS series. Ruby and Rails dependencies are resolved in the committed lockfile. The development image installs that locked resolution with Bundler frozen mode. The database image is pinned to `mysql:8.4.11`; record its actual digest when retaining experiment results.
 

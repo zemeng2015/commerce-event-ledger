@@ -1,4 +1,5 @@
 require_relative "boot"
+require_relative "../lib/commerce_event_ledger/webhook_endpoint"
 
 require "rails"
 # Pick the frameworks you want:
@@ -26,7 +27,8 @@ module CommerceEventLedger
     # Please, add to the `ignore` list any other `lib` subdirectories that do
     # not contain `.rb` files, or that should not be reloaded or eager loaded.
     # Common ones are `templates`, `generators`, or `middleware`, for example.
-    config.autoload_lib(ignore: %w[assets tasks])
+    config.autoload_lib(ignore: %w[assets tasks commerce_event_ledger/webhook_endpoint.rb])
+    config.middleware.insert_before 0, CommerceEventLedger::WebhookEndpoint
 
     # Packwerk public_path defines visibility, not Rails autoload roots.
     Dir[root.join("packages/*/app/{public,internal,models,services,jobs,controllers}")].sort.each do |path|

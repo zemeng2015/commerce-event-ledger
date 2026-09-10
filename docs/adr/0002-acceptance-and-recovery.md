@@ -59,7 +59,7 @@ Canonical receipt assigns the server-selected handler name/version once and pers
 | Poison event / exhausted retries | Inspectable dead-letter outcome with bounded attempts, not an endless hot loop. |
 | Authorized replay / cross-tenant replay | Authorized action is audited and recoverable; cross-tenant action is rejected without data leakage. |
 
-The duplicate/crash/out-of-order suite must additionally pass 20 consecutive runs against MySQL. Capture raw experiment output, claim/retry settings, queue adapter settings, runtime versions, and observed recovery delays. No rows in this matrix have passed yet.
+The duplicate/crash/out-of-order suite must additionally pass 20 consecutive runs against MySQL. Capture raw experiment output, claim/retry settings, queue adapter settings, runtime versions, and observed recovery delays. The [receipt checkpoint](../s1-receipt-checkpoint.md) establishes invalid-signature rejection, receipt rollback, and ten-delivery canonical deduplication with 20 repetitions. It does not establish the full 100-delivery/one-effect or crash/recovery matrix above; this ADR remains proposed.
 
 ## Alternatives and consequences
 

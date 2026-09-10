@@ -25,7 +25,10 @@ module Webhooks
       # The source event ID is opaque. Do not invent UUID or case-folding
       # semantics for identifiers supplied by the provider.
       invalid! unless event_id.ascii_only? && event_id.match?(/\A[!-~]{1,200}\z/)
-      order = JSON.parse(body, object_class: UniqueJsonObject, max_nesting: 64, allow_nan: false, create_additions: false)
+      # Reject duplicates in UniqueJsonObject without JSON emitting input keys
+      # to stderr before our sanitized normalization error is raised.
+      order = JSON.parse(body, object_class: UniqueJsonObject, max_nesting: 64,
+        allow_nan: false, create_additions: false, allow_duplicate_key: true)
       invalid! unless order.is_a?(Hash) && order["id"].is_a?(Integer) && order["id"].positive?
       created = timestamp(order.fetch("created_at"))
       updated = timestamp(order.fetch("updated_at"))

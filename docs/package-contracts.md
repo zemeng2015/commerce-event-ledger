@@ -1,6 +1,6 @@
 # Package contracts
 
-These contracts define the in-process order-create boundary. Composition tests use explicit test doubles; separate [fixture and normalization tests](fixtures.md) exercise the real source adapter and publisher. Authentication, persistence, and effect implementations remain pending. Interface tests do not establish HMAC ingress security, durable receipt, effect idempotency, or recovery. No HTTP ingestion route or default successful adapter is installed by this increment.
+These contracts define the in-process order-create boundary. Composition tests use explicit test doubles; separate [fixture and normalization tests](fixtures.md) exercise the real source adapter and publisher. The [HTTP receipt adapter](http-receipt.md) now implements authentication and canonical persistence. Effect processing and recovery remain pending; interface tests alone do not establish their guarantees.
 
 ## Dependency direction
 
@@ -29,7 +29,7 @@ Event summaries allow only `pending`, `processing`, `retry_wait`, `processed`, a
 
 ## Ports and composition
 
-- `Webhooks::Ingress` requires explicit authentication, normalization, receipt, and handler-selection collaborators. Authentication must succeed before normalization or receipt. Source configuration is server-owned input; request headers alone cannot authorize a shop. The HTTP adapter remains unwired until that trust boundary is implemented.
+- `Webhooks::Ingress` requires explicit authentication, normalization, receipt, and handler-selection collaborators. Authentication must succeed before normalization or receipt. Source configuration is server-owned input; request headers alone cannot authorize a shop. The HTTP adapter composes `ShopifySources`, `ShopifyAuthenticator`, `ShopifyOrderCreate`, and `EventLedger::ReceiptStore`; root middleware supplies the server-selected Orders handler identity without inventing an effect executor. The full composition service remains reserved for explicit processing/query adapters.
 - Receipt persistence accepts the envelope and a server-selected handler identity. Canonical insert assigns that identity once. Duplicate receipt returns the existing event and retains its original handler identity even if the current deployment selects a different version.
 - `EventLedger::HandlerRegistry` selects a configured handler by source/topic for initial receipt and resolves an exact name/version for processing. Missing or duplicate registrations fail explicitly. It is immutable and does not discover handlers, maintain a global mutable registry, or fall back to a newer version.
 - `Orders::Handler#call(event:)` accepts a persisted event assigned to its exact identity. Its required effect executor implements the Orders transaction below. The contract layer supplies no in-memory effect store or default success.

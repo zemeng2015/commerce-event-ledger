@@ -1,6 +1,6 @@
 # Synthetic order-create fixture
 
-The offline fixture exercises a narrow Shopify `orders/create` contract without customer data or a Shopify account. Normalization and fixture publishing do not prove authentication, durable receipt, deduplication, or a committed order effect. The real HTTP ingress and MySQL adapters are separate S1 work.
+The offline fixture exercises a narrow Shopify `orders/create` contract without customer data or a Shopify account. Normalization and fixture publishing alone do not prove authentication, durable receipt, deduplication, or a committed order effect. The [HTTP receipt implementation](http-receipt.md) adds actual authentication and canonical storage; order effects remain pending.
 
 ## Run without a store or database
 
@@ -20,13 +20,13 @@ docker compose run --rm --no-deps app ruby bin/publish_fixture --dry-run
 
 Build the image first with `docker compose build app`. The `--no-deps` option keeps this dry run independent of the database service.
 
-When the HTTP receiver is implemented and running locally, send ten deliveries with:
+With the development HTTP receiver running locally, send ten deliveries with:
 
 ```sh
 ruby bin/publish_fixture --count 10
 ```
 
-The default destination is `http://127.0.0.1:3000/webhooks/shopify/fixture`. At this increment, the route is not implemented; a running scaffold responds with an error rather than a successful receipt. Actual byte-for-byte HTTP publishing is tested with a temporary loopback receiver. A future end-to-end demo must additionally inspect canonical-event and effect counts in MySQL.
+The default destination is `http://127.0.0.1:3000/webhooks/shopify/fixture`. For Docker, use `docker compose exec -T app ruby bin/publish_fixture --count 10`. The development receiver commits a canonical pending event before returning `202`. Publisher byte fidelity is also tested against a temporary loopback receiver. The full end-to-end demo must additionally prove a committed order effect, which remains pending.
 
 ## Repeatability and transport behavior
 
