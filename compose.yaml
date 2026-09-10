@@ -68,6 +68,7 @@ services:
       DB_USERNAME: commerce_event_ledger
       DB_PASSWORD: ledger-local-only
       RAILS_MAX_THREADS: "5"
+      LEDGER_LOG_STDOUT: "1"
     depends_on:
       app:
         condition: service_healthy

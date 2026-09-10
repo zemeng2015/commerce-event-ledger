@@ -120,6 +120,15 @@ jobs:
           curl --fail --silent --show-error http://127.0.0.1:3000/up
           docker compose exec -T app ruby bin/publish_fixture --count 10
           docker compose exec -T app ruby bin/rails runner script/check_order_demo.rb
+      - name: Exercise repeated worker startup against signed duplicate deliveries
+        run: |
+          for iteration in $(seq 1 20); do
+            echo "Worker startup iteration ${iteration}/20"
+            docker compose restart jobs
+            event_id=$(docker compose exec -T app ruby -rsecurerandom -e 'puts SecureRandom.uuid')
+            docker compose exec -T app ruby bin/publish_fixture --event-id "$event_id" --count 10
+            docker compose exec -T -e LEDGER_DEMO_EVENT_ID="$event_id" app ruby bin/rails runner script/check_order_demo.rb
+          done
       - name: Verify the fixture user cannot access a wildcard-similar database
         run: |
           docker compose exec -T db sh -c 'MYSQL_PWD="$MYSQL_ROOT_PASSWORD" mysql --user=root --execute="CREATE DATABASE commerceXeventXledgerXtest"'
