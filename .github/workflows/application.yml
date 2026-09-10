@@ -64,6 +64,10 @@ jobs:
       - name: Prepare and test the application
         run: |
           bin/setup
+          for iteration in $(seq 1 20); do
+            echo "Canonical receipt race iteration ${iteration}/20"
+            bundle exec ruby -r ./test/coverage_boot bin/rails test test/integration/webhook_receipt_test.rb --name /ten_sequential/
+          done
           bin/test
           bundle exec ruby script/check_coverage.rb
           bin/rails zeitwerk:check
