@@ -31,5 +31,7 @@ Dir.chdir(APP_ROOT) do
   end
 
   system(RbConfig.ruby, "bin/rails", "db:prepare", exception: true)
-  exec RbConfig.ruby, "bin/rails", "test", *ARGV
+  # Stable middleware loads during Rails boot, before test_helper. Instrument
+  # that boot too; never pretend an unmeasured middleware file is covered.
+  exec RbConfig.ruby, "-r", "bundler/setup", "-r", "./test/coverage_boot", "bin/rails", "test", *ARGV
 end

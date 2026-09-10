@@ -117,15 +117,17 @@ class WebhookReceiptTest < ActiveSupport::TestCase
   end
 
   test "database failure rolls back tenant registration and returns sanitized unavailable" do
-    # A real MySQL trigger fails the event insert after the shop insert.
-    connection { |db| db.execute("CREATE TRIGGER reject_test_receipt BEFORE INSERT ON received_events FOR EACH ROW SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'synthetic-database-secret'") }
+    # A real MySQL constraint fails the event insert after the shop insert,
+    # without requiring SUPER or weakening binary-log safety for fixture users.
+    connection { |db| db.execute("ALTER TABLE received_events ADD CONSTRAINT reject_test_receipt CHECK (status = 'fault-injection')") }
+    installed = true
     status, _, chunks = request
     assert_equal 503, status
-    refute_includes chunks.join, "synthetic-database-secret"
+    refute_includes chunks.join, "reject_test_receipt"
     assert_equal 0, count
     assert_equal 0, connection { |db| db.select_value("SELECT COUNT(*) FROM shops") }
   ensure
-    connection { |db| db.execute("DROP TRIGGER IF EXISTS reject_test_receipt") }
+    connection { |db| db.execute("ALTER TABLE received_events DROP CHECK reject_test_receipt") } if installed
   end
 
   test "malformed supported-route requests have bounded sanitized responses" do
