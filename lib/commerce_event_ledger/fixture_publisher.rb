@@ -44,6 +44,7 @@ module CommerceEventLedger
     def call(url: DEFAULT_URL, count: 1, event_id: nil, dry_run: false)
       uri = URI.parse(url)
       unless uri.scheme == "http" && %w[127.0.0.1 ::1].include?(uri.hostname) &&
+        (1..65535).cover?(uri.port) &&
         uri.userinfo.nil? && uri.query.nil? && uri.fragment.nil? &&
         count.is_a?(Integer) && (1..100).cover?(count) && [ true, false ].include?(dry_run)
         raise PublishError

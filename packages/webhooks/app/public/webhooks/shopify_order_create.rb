@@ -16,7 +16,7 @@ module Webhooks
     def call(raw_body:, headers:, source_configuration:)
       invalid! unless source_configuration.instance_of?(ShopifySource) && raw_body.is_a?(String) &&
         raw_body.bytesize <= 1_048_576 && headers.is_a?(Hash)
-      body = raw_body.dup.force_encoding(Encoding::UTF_8)
+      body = raw_body.dup.force_encoding(Encoding::UTF_8).freeze
       invalid! unless body.valid_encoding?
       metadata = required_headers(headers)
       invalid! unless metadata.fetch("x-shopify-topic") == "orders/create" &&
@@ -32,7 +32,7 @@ module Webhooks
       order_id = order.fetch("id").to_s
       EventLedger::Envelope.new(shop_id: source_configuration.shop_id, source: "shopify",
         external_event_id: "orders/create:#{event_id.downcase}", topic: "orders/create", subject_id: order_id,
-        occurred_at: updated, source_version: nil, payload_sha256: Digest::SHA256.hexdigest(raw_body),
+        occurred_at: updated, source_version: nil, payload_sha256: Digest::SHA256.hexdigest(body),
         payload: { "order_id" => order_id, "state" => "created",
           "created_at" => created.iso8601(9), "updated_at" => updated.iso8601(9) })
     rescue StandardError
@@ -61,7 +61,7 @@ module Webhooks
         name = key.downcase
         next unless REQUIRED_HEADERS.include?(name)
         invalid! if selected.key?(name) || !value.is_a?(String)
-        selected[name] = value
+        selected[name] = value.dup.freeze
       end
       invalid! unless selected.size == REQUIRED_HEADERS.size
       selected

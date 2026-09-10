@@ -49,7 +49,7 @@ class FixturePublisherTest < ActiveSupport::TestCase
 
   test "invalid destinations counts and identities fail before transport" do
     [ "https://127.0.0.1/", "http://example.com/", "http://localhost/", "http://127.0.0.1@elsewhere/",
-      "http://user:password@127.0.0.1/", "http://127.0.0.1/?secret=x", "http://127.0.0.1/#x", "not a url" ].each do |url|
+      "http://user:password@127.0.0.1/", "http://127.0.0.1/?secret=x", "http://127.0.0.1/#x", "http://127.0.0.1:0/", "not a url" ].each do |url|
       assert_raises(CommerceEventLedger::FixturePublisher::PublishError) { publisher.call(url: url, dry_run: true) }
     end
     [ 0, 101, "2", nil ].each do |count|
