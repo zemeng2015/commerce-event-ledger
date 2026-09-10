@@ -1,0 +1,11 @@
+default: &default
+  recover_events:
+    class: CommerceEventLedger::RecoverEventsJob
+    schedule: every minute
+
+development:
+  <<: *default
+test:
+  <<: *default
+production:
+  <<: *default

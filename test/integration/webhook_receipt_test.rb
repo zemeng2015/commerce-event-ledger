@@ -66,6 +66,7 @@ class WebhookReceiptTest < ActiveSupport::TestCase
     assert_equal 401, request(body: @body + " ", signature: sign(@body)).first
     assert_equal 401, request(body: "", signature: nil).first
     assert_equal 0, count
+    assert_equal 0, connection { |db| db.select_value("SELECT COUNT(*) FROM solid_queue_jobs") }
     assert_equal 0, connection { |db| db.select_value("SELECT COUNT(*) FROM shops") }
   end
 
@@ -147,6 +148,7 @@ class WebhookReceiptTest < ActiveSupport::TestCase
     assert_equal 503, status
     refute_includes chunks.join, "reject_test_receipt"
     assert_equal 0, count
+    assert_equal 0, connection { |db| db.select_value("SELECT COUNT(*) FROM solid_queue_jobs") }
     assert_equal 0, connection { |db| db.select_value("SELECT COUNT(*) FROM shops") }
   ensure
     connection { |db| db.execute("ALTER TABLE received_events DROP CHECK reject_test_receipt") } if installed
@@ -217,6 +219,10 @@ class WebhookReceiptTest < ActiveSupport::TestCase
   def clear_receipts
     connection do |db|
       raise "Unsafe test database" unless db.select_value("SELECT DATABASE()") == "commerce_event_ledger_test"
+      db.execute("DELETE FROM solid_queue_jobs")
+      db.execute("DELETE FROM processing_attempts")
+      db.execute("DELETE FROM processed_effects")
+      db.execute("DELETE FROM order_projections")
       db.execute("DELETE FROM received_events")
       db.execute("DELETE FROM shops")
     end

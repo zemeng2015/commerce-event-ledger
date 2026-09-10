@@ -57,5 +57,24 @@ services:
       retries: 30
       start_period: 30s
 
+  jobs:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    environment:
+      RAILS_ENV: development
+      DB_HOST: db
+      DB_PORT: "3306"
+      DB_USERNAME: commerce_event_ledger
+      DB_PASSWORD: ledger-local-only
+      RAILS_MAX_THREADS: "5"
+      LEDGER_LOG_STDOUT: "1"
+    depends_on:
+      app:
+        condition: service_healthy
+    volumes:
+      - .:/rails
+    command: [ "ruby", "bin/jobs" ]
+
 volumes:
   mysql_data:

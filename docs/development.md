@@ -1,6 +1,6 @@
 # Local development
 
-The development environment supports Rails API boot, the [four-package contracts](package-contracts.md), and [signed HTTP/canonical MySQL receipt](http-receipt.md). Processing workers, order projections/effects, and the complete signed-event demo remain later S1 work; starting this stack does not demonstrate the ledger's full reliability guarantees.
+The development environment supports Rails API boot, the [four-package contracts](package-contracts.md), and [signed HTTP/canonical MySQL receipt](http-receipt.md). The jobs service and transactional order projections/effects are implemented; status queries and the packaged demo remain later S1 work; starting this stack does not demonstrate the ledger's full reliability guarantees.
 
 The application uses Ruby 4.0.6, Rails 8.1.3.1, and MySQL 8.4.11 from the 8.4 LTS series. Ruby and Rails dependencies are resolved in the committed lockfile. The development image installs that locked resolution with Bundler frozen mode. The database image is pinned to `mysql:8.4.11`; record its actual digest when retaining experiment results.
 
@@ -92,6 +92,12 @@ docker compose run --rm -e CI=true app bin/test
 docker compose run --rm app ruby script/check_coverage.rb
 ```
 
-`CI=true` makes tests eager-load the registered application/package/library roots in both Docker and native CI. The coverage check requires every tracked application/package/library source to be loaded and an actual nonzero branch denominator, including the fixture publisher. Raw SimpleCov results and `coverage/branch-summary.json` are retained separately for native and Docker CI. The release's core idempotency/recovery coverage gate remains pending until those behaviors exist. A separate CI job exercises the [standalone fixture dry run](fixtures.md) without installing the application bundle or starting a database.
+`CI=true` makes tests eager-load the registered application/package/library roots in both Docker and native CI. The coverage check requires every tracked application/package/library source to be loaded and an actual nonzero branch denominator, including the fixture publisher. Raw SimpleCov results and `coverage/branch-summary.json` are retained separately for native and Docker CI. The release's core idempotency/recovery coverage gate remains pending until the complete failure suite and separately scoped core measurements are available. A separate CI job exercises the [standalone fixture dry run](fixtures.md) without installing the application bundle or starting a database.
 
 The boundary probe operates only on a disposable copy of tracked source. Run it after staging new application files so the copy contains them. It proves permitted public access plus rejected private access, undeclared dependencies, and dependency cycles. No baseline violation file or privacy exception is added to make the check pass.
+
+## Worker and asynchronous verification
+
+`docker compose up --build --wait` starts the jobs service alongside the application. `ruby bin/jobs check` validates queue configuration; `ruby bin/jobs` starts the native worker. Development jobs use `LEDGER_LOG_STDOUT=1` for container diagnostics. Queue recovery scans eligible events every minute.
+
+On a fresh fixture database, send ten deliveries with the publisher, then run `docker compose exec -T app bin/rails runner script/check_order_demo.rb`. The verifier polls uncached MySQL state for up to 30 seconds and requires ten deliveries, one effect, and one projection transition. Reusing the default event ID adds deliveries; this narrow verifier is not a resettable demo command. See the [processing checkpoint](s1-processing-checkpoint.md) for the separate restart experiment and limits.

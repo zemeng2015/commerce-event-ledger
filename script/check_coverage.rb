@@ -34,7 +34,7 @@ total = measured.values.sum { |entry| entry.fetch(:branches) }
 covered = measured.values.sum { |entry| entry.fetch(:covered_branches) }
 abort "No actual branches measured; zero-denominator coverage is not evidence." if total.zero?
 summary = {
-  scope: "Application and package interfaces; core idempotency and recovery remain pending",
+  scope: "Implemented application, package and library sources; full release gates require separate evidence",
   files: measured,
   branches: total,
   covered_branches: covered,
