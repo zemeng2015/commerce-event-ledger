@@ -7,6 +7,9 @@ SimpleCov.start "rails" do
 end
 
 require_relative "../config/environment"
+unless Rails.env.test? && ActiveRecord::Base.connection.select_value("SELECT DATABASE()") == "commerce_event_ledger_test"
+  abort "Tests require the isolated commerce_event_ledger_test database"
+end
 require "rails/test_help"
 
 module ActiveSupport
