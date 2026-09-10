@@ -49,7 +49,7 @@ The default signing value, `ledger-fixture-secret-do-not-use-outside-local`, is 
 | `X-Shopify-Shop-Domain` | Matches the trusted source configuration |
 | `X-Shopify-Event-Id` | Opaque merchant-action identifier, 1–200 printable non-space ASCII bytes; preserved without case folding or a delivery-ID fallback |
 | JSON `id` | Positive integer, retained exactly as a decimal string for the external order identity |
-| JSON `created_at`, `updated_at` | Valid RFC 3339 timestamps with explicit offsets and at most nanosecond precision; update time cannot precede creation |
+| JSON `created_at`, `updated_at` | Valid calendar timestamps in RFC 3339 form, with explicit offsets, seconds 00–59, and at most nanosecond precision; update time cannot precede creation |
 
 Header names are case-insensitive; ambiguous duplicate spellings of a required header are rejected. The input must be a UTF-8 JSON object no larger than 1 MiB, with bounded nesting and no duplicate object keys. Malformed values fail with a generic normalization error without the request body or secret.
 

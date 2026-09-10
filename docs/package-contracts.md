@@ -1,6 +1,6 @@
 # Package contracts
 
-These contracts define the in-process order-create boundary. Their tests use explicit test doubles for the pending authentication, normalization, persistence, and effect implementations. They do not establish HMAC security, durable receipt, effect idempotency, or recovery. No HTTP ingestion route or default successful adapter is installed by this increment.
+These contracts define the in-process order-create boundary. Composition tests use explicit test doubles; separate [fixture and normalization tests](fixtures.md) exercise the real source adapter and publisher. Authentication, persistence, and effect implementations remain pending. Interface tests do not establish HMAC ingress security, durable receipt, effect idempotency, or recovery. No HTTP ingestion route or default successful adapter is installed by this increment.
 
 ## Dependency direction
 

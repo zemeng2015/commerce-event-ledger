@@ -92,6 +92,6 @@ docker compose run --rm -e CI=true app bin/test
 docker compose run --rm app ruby script/check_coverage.rb
 ```
 
-`CI=true` makes tests eager-load the registered application/package roots in both Docker and native CI. The coverage check requires every tracked application/package source to be loaded and an actual nonzero branch denominator. Raw SimpleCov results and `coverage/branch-summary.json` are retained separately for native and Docker CI. These measurements cover the current interface layer; the release's core idempotency/recovery coverage gate remains pending until those behaviors exist.
+`CI=true` makes tests eager-load the registered application/package/library roots in both Docker and native CI. The coverage check requires every tracked application/package/library source to be loaded and an actual nonzero branch denominator, including the fixture publisher. Raw SimpleCov results and `coverage/branch-summary.json` are retained separately for native and Docker CI. The release's core idempotency/recovery coverage gate remains pending until those behaviors exist. A separate CI job exercises the [standalone fixture dry run](fixtures.md) without installing the application bundle or starting a database.
 
 The boundary probe operates only on a disposable copy of tracked source. Run it after staging new application files so the copy contains them. It proves permitted public access plus rejected private access, undeclared dependencies, and dependency cycles. No baseline violation file or privacy exception is added to make the check pass.

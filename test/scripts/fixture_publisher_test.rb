@@ -47,6 +47,17 @@ class FixturePublisherTest < ActiveSupport::TestCase
     assert_equal "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa", alternate.fetch(:event_id)
   end
 
+  test "connection failures expose no destination or secret" do
+    reserved = TCPServer.new("127.0.0.1", 0)
+    port = reserved.addr[1]
+    reserved.close
+    error = assert_raises(CommerceEventLedger::FixturePublisher::PublishError) do
+      publisher.call(url: "http://127.0.0.1:#{port}/synthetic-secret-marker")
+    end
+    assert_nil error.cause
+    refute_includes error.full_message, "synthetic-secret-marker"
+  end
+
   test "invalid destinations counts and identities fail before transport" do
     [ "https://127.0.0.1/", "http://example.com/", "http://localhost/", "http://127.0.0.1@elsewhere/",
       "http://user:password@127.0.0.1/", "http://127.0.0.1/?secret=x", "http://127.0.0.1/#x", "http://127.0.0.1:0/", "not a url" ].each do |url|
@@ -101,7 +112,7 @@ class FixturePublisherTest < ActiveSupport::TestCase
             end
             captured << [ headers, socket.read(Integer(headers.fetch("content-length"))) ]
             body = "synthetic-response-secret"
-            socket.write("HTTP/1.1 #{status} Test\r\nContent-Length: #{body.bytesize}\r\nConnection: close\r\nLocation: http://example.com/\r\n\r\n#{body}")
+            socket.write("HTTP/1.1 #{status} Test\r\nContent-Length: #{body.bytesize}\r\nConnection: close\r\nLocation: http://127.0.0.1:1/redirect\r\n\r\n#{body}")
           ensure
             socket.close
           end
