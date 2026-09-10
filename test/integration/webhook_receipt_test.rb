@@ -66,6 +66,7 @@ class WebhookReceiptTest < ActiveSupport::TestCase
     assert_equal 401, request(body: @body + " ", signature: sign(@body)).first
     assert_equal 401, request(body: "", signature: nil).first
     assert_equal 0, count
+    assert_equal 0, connection { |db| db.select_value("SELECT COUNT(*) FROM solid_queue_jobs") }
     assert_equal 0, connection { |db| db.select_value("SELECT COUNT(*) FROM shops") }
   end
 
@@ -147,6 +148,7 @@ class WebhookReceiptTest < ActiveSupport::TestCase
     assert_equal 503, status
     refute_includes chunks.join, "reject_test_receipt"
     assert_equal 0, count
+    assert_equal 0, connection { |db| db.select_value("SELECT COUNT(*) FROM solid_queue_jobs") }
     assert_equal 0, connection { |db| db.select_value("SELECT COUNT(*) FROM shops") }
   ensure
     connection { |db| db.execute("ALTER TABLE received_events DROP CHECK reject_test_receipt") } if installed

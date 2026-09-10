@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_09_10_000004) do
+ActiveRecord::Schema[8.1].define(version: 2026_09_10_000005) do
   create_table "order_projections", charset: "utf8mb4", collation: "utf8mb4_0900_bin", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.string "external_order_id", null: false
@@ -49,16 +49,16 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_10_000004) do
     t.bigint "shop_id", null: false
     t.datetime "started_at", null: false
     t.string "status", limit: 32, null: false
-    t.string "token", limit: 64, null: false
+    t.string "token_digest", limit: 64, null: false
     t.index ["event_id", "number"], name: "index_processing_attempts_on_event_id_and_number", unique: true
     t.index ["event_id", "shop_id"], name: "fk_rails_7dd43bed32"
-    t.index ["token"], name: "index_processing_attempts_on_token", unique: true
+    t.index ["token_digest"], name: "index_processing_attempts_on_token_digest", unique: true
   end
 
   create_table "received_events", charset: "utf8mb4", collation: "utf8mb4_0900_bin", force: :cascade do |t|
     t.integer "attempt_count", default: 0, null: false
     t.datetime "claim_expires_at"
-    t.string "claim_token", limit: 64
+    t.string "claim_token_digest", limit: 64
     t.datetime "completed_at"
     t.datetime "created_at", null: false
     t.bigint "deliveries_count", default: 1, null: false
