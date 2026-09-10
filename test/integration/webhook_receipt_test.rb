@@ -40,7 +40,9 @@ class WebhookReceiptTest < ActiveSupport::TestCase
     10.times { assert_equal 202, request.first }
     assert_equal 1, count
     assert_equal 10, rows.first.fetch("deliveries_count")
-    clear_receipts
+    # Keep the existing tenant so canonical insert races are not serialized by
+    # concurrent first-time shop registration.
+    connection { |db| db.execute("DELETE FROM received_events") }
     ready = Queue.new
     start = Queue.new
     workers = 10.times.map do
@@ -114,6 +116,25 @@ class WebhookReceiptTest < ActiveSupport::TestCase
       db.transaction { assert_equal 503, request.first }
     end
     assert_equal 0, count
+  end
+
+  test "receipt identity is source scoped and an existing tenant mapping cannot be replaced" do
+    source = Webhooks::ShopifySource.new(shop_id: 7, shop_domain: @headers.fetch("X-Shopify-Shop-Domain"), secret: @secret)
+    envelope = Webhooks::ShopifyOrderCreate.new.call(raw_body: @body, headers: @headers, source_configuration: source)
+    store = EventLedger::ReceiptStore.new(shop_id: 7, shop_domain: source.shop_domain)
+    store.receive(envelope: envelope, handler_name: "order_projection", handler_version: "v1")
+    other = EventLedger::Envelope.new(shop_id: 7, source: "synthetic-other-source", external_event_id: envelope.external_event_id,
+      topic: envelope.topic, subject_id: envelope.subject_id, occurred_at: envelope.occurred_at,
+      payload: envelope.payload, payload_sha256: envelope.payload_sha256)
+    store.receive(envelope: other, handler_name: "order_projection", handler_version: "v1")
+    assert_equal 2, count
+    wrong_domain = EventLedger::ReceiptStore.new(shop_id: 7, shop_domain: "different.myshopify.com")
+    error = assert_raises(EventLedger::ReceiptStore::StorageError) do
+      wrong_domain.receive(envelope: envelope, handler_name: "order_projection", handler_version: "v1")
+    end
+    assert_nil error.cause
+    assert_equal source.shop_domain, connection { |db| db.select_value("SELECT shop_domain FROM shops WHERE id = 7") }
+    assert_equal 2, count
   end
 
   test "database failure rolls back tenant registration and returns sanitized unavailable" do

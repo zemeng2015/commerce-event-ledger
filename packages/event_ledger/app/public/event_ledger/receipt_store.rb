@@ -26,7 +26,8 @@ module EventLedger
         event_id = nil
         duplicate = false
         ReceivedEvent.transaction do
-          shop = Shop.create_or_find_by!(id: @shop_id) { |record| record.shop_domain = @shop_domain }
+          shop = Shop.find_by(id: @shop_id) ||
+            Shop.create_or_find_by!(id: @shop_id) { |record| record.shop_domain = @shop_domain }
           raise StorageError unless shop.shop_domain == @shop_domain
           attributes = canonical_attributes(envelope)
           record = ReceivedEvent.create_or_find_by!(shop_id: @shop_id, source: envelope.source,

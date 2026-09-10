@@ -33,7 +33,7 @@ module Webhooks
       receipt = EventLedger::ReceiptStore.new(shop_id: source.shop_id, shop_domain: source.shop_domain)
         .receive(envelope: envelope, handler_name: @handler_name, handler_version: @handler_version)
       [202, { "content-type" => "application/json", "cache-control" => "no-store" },
-        [JSON.generate(event_id: receipt.event_id, duplicate: receipt.duplicate, status: "pending")]]
+        [JSON.generate(event_id: receipt.event_id, duplicate: receipt.duplicate)]]
     rescue ShopifyOrderCreate::NormalizationError
       response(400, "invalid_webhook")
     rescue EventLedger::ReceiptStore::IdentityConflict
