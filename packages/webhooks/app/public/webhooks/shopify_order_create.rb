@@ -9,7 +9,6 @@ module Webhooks
   class ShopifyOrderCreate
     class NormalizationError < StandardError; end
 
-    UUID = /\A[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\z/i
     TIMESTAMP = /\A\d{4}-\d{2}-\d{2}T(?:[01]\d|2[0-3]):[0-5]\d:[0-5]\d(?:\.\d{1,9})?(?:Z|[+-](?:[01]\d|2[0-3]):[0-5]\d)\z/
     REQUIRED_HEADERS = %w[x-shopify-topic x-shopify-event-id x-shopify-shop-domain x-shopify-api-version].freeze
 
@@ -23,7 +22,9 @@ module Webhooks
         metadata.fetch("x-shopify-api-version") == "2026-07" &&
         metadata.fetch("x-shopify-shop-domain") == source_configuration.shop_domain
       event_id = metadata.fetch("x-shopify-event-id")
-      invalid! unless event_id.ascii_only? && event_id.match?(UUID)
+      # The source event ID is opaque. Do not invent UUID or case-folding
+      # semantics for identifiers supplied by the provider.
+      invalid! unless event_id.ascii_only? && event_id.match?(/\A[!-~]{1,200}\z/)
       order = JSON.parse(body, object_class: UniqueJsonObject, max_nesting: 64, allow_nan: false, create_additions: false)
       invalid! unless order.is_a?(Hash) && order["id"].is_a?(Integer) && order["id"].positive?
       created = timestamp(order.fetch("created_at"))
@@ -31,7 +32,7 @@ module Webhooks
       invalid! if updated < created
       order_id = order.fetch("id").to_s
       EventLedger::Envelope.new(shop_id: source_configuration.shop_id, source: "shopify",
-        external_event_id: "orders/create:#{event_id.downcase}", topic: "orders/create", subject_id: order_id,
+        external_event_id: "orders/create:#{event_id}", topic: "orders/create", subject_id: order_id,
         occurred_at: updated, source_version: nil, payload_sha256: Digest::SHA256.hexdigest(body),
         payload: { "order_id" => order_id, "state" => "created",
           "created_at" => created.iso8601(9), "updated_at" => updated.iso8601(9) })

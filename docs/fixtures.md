@@ -47,7 +47,7 @@ The default signing value, `ledger-fixture-secret-do-not-use-outside-local`, is 
 | `X-Shopify-Topic` | Exactly `orders/create` |
 | `X-Shopify-API-Version` | `2026-07`, the explicitly supported fixture/adapter version |
 | `X-Shopify-Shop-Domain` | Matches the trusted source configuration |
-| `X-Shopify-Event-Id` | UUID identifying the originating merchant action; no delivery-ID fallback |
+| `X-Shopify-Event-Id` | Opaque merchant-action identifier, 1–200 printable non-space ASCII bytes; preserved without case folding or a delivery-ID fallback |
 | JSON `id` | Positive integer, retained exactly as a decimal string for the external order identity |
 | JSON `created_at`, `updated_at` | Valid RFC 3339 timestamps with explicit offsets and at most nanosecond precision; update time cannot precede creation |
 
@@ -57,7 +57,7 @@ The normalized payload contains only `order_id`, `state` (`created`), `created_a
 
 ## Event identity and ordering
 
-The canonical external event identity is `orders/create:<lowercase X-Shopify-Event-Id>`, with source `shopify` and the trusted internal shop ID. Topic qualification prevents distinct supported topics from being collapsed under the same merchant-action identity when later topics are added. `X-Shopify-Webhook-Id` identifies a delivery and is not the canonical key. The raw event UUID remains recoverable from the documented qualification; it is not replaced by a random internal ID.
+The canonical external event identity is `orders/create:<X-Shopify-Event-Id>`, with source `shopify` and the trusted internal shop ID. Topic qualification prevents distinct supported topics from being collapsed under the same merchant-action identity when later topics are added. `X-Shopify-Webhook-Id` identifies a delivery and is not the canonical key. The source identifier remains recoverable from the documented qualification; it is not replaced by a random internal ID. Only the synthetic publisher's optional event-ID argument requires a UUID; normalization does not assume that format for provider identities.
 
 `occurred_at` uses the resource's `updated_at`, and `source_version` is `nil`: the adapter does not invent a monotonically increasing version from delivery time. `X-Shopify-Triggered-At`, local receipt time, and arrival order are not used as the resource version. Future projection code must define stale/equal timestamp handling explicitly and preserve source precision; normalization does not establish non-regression by itself.
 

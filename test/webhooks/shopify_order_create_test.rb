@@ -32,18 +32,19 @@ class ShopifyOrderCreateTest < ActiveSupport::TestCase
     first = normalize(headers: @headers.merge("X-Shopify-Webhook-Id" => SecureRandom.uuid))
     second = normalize(headers: @headers.transform_keys(&:downcase).merge("x-shopify-webhook-id" => SecureRandom.uuid))
     assert_equal first.external_event_id, second.external_event_id
-    assert_equal first.external_event_id, normalize(headers: @headers.merge("X-Shopify-Event-Id" => @headers.fetch("X-Shopify-Event-Id").upcase)).external_event_id
+    assert_equal "orders/create:Opaque-Provider-ID", normalize(headers: @headers.merge("X-Shopify-Event-Id" => "Opaque-Provider-ID")).external_event_id
     assert_invalid(headers: @headers.except("X-Shopify-Event-Id").merge("X-Shopify-Webhook-Id" => SecureRandom.uuid))
   end
 
   test "required headers reject ambiguity topic version domain and malformed identity" do
     @headers.each_key { |key| assert_invalid(headers: @headers.except(key)) }
     { "X-Shopify-Topic" => "orders/updated", "X-Shopify-API-Version" => "2026-04",
-      "X-Shopify-Shop-Domain" => "another.myshopify.com", "X-Shopify-Event-Id" => "synthetic-secret-marker" }.each do |key, value|
+      "X-Shopify-Shop-Domain" => "another.myshopify.com", "X-Shopify-Event-Id" => "\nsynthetic-secret-marker" }.each do |key, value|
       assert_invalid(headers: @headers.merge(key => value))
     end
     assert_invalid(headers: @headers.merge("x-shopify-topic" => "orders/create"))
     assert_invalid(headers: @headers.merge("X-Shopify-Event-Id" => nil))
+    assert_invalid(headers: @headers.merge("X-Shopify-Event-Id" => "a" * 201))
     assert_invalid(headers: @headers.merge(1 => "bad"))
     assert_invalid(headers: nil)
   end
