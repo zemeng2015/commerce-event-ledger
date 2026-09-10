@@ -1,6 +1,6 @@
 # Commerce Event Ledger: project charter
 
-Status: foundation established; application behavior is planned and unverified. This charter defines the intended v0.1 scope and acceptance criteria, not capabilities that exist today.
+Status: S1 in progress; signed HTTP and canonical receipt are implemented and tested. Processing, recovery, and full v0.1 acceptance remain pending. This charter defines the intended complete scope; consult the [receipt checkpoint](s1-receipt-checkpoint.md) for currently verified behavior.
 
 **Failure-aware webhook ingestion for Rails commerce applications.**
 
