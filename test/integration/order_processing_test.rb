@@ -177,6 +177,8 @@ class OrderProcessingTest < ActiveSupport::TestCase
     ActiveRecord::Base.logger = ActiveSupport::Logger.new(output)
     store = EventLedger::ProcessingStore.new(shop_id: 7)
     claim = store.claim(event_id: event.event_id)
+    assert_equal Digest::SHA256.hexdigest(claim.token), row("received_events").fetch("claim_token_digest")
+    assert_equal Digest::SHA256.hexdigest(claim.token), row("processing_attempts").fetch("token_digest")
     store.fail(claim: claim)
     refute_includes output.string, claim.token
     refute_includes claim.to_json, claim.token

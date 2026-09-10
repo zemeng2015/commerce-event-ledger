@@ -2,6 +2,7 @@
 
 require "securerandom"
 require "time"
+require "digest/sha2"
 
 module EventLedger
   class ProcessingStore
@@ -30,17 +31,18 @@ module EventLedger
         now = Time.now.utc
         next nil unless record && eligible?(record, now)
         if record.status == "processing"
-          ProcessingAttempt.where(event_id: id, shop_id: @shop_id, token: record.claim_token)
+          ProcessingAttempt.where(event_id: id, shop_id: @shop_id, token_digest: record.claim_token_digest)
             .update_all(status: "abandoned", finished_at: now, error_code: "lease_expired")
         end
         if record.attempt_count >= MAX_ATTEMPTS
-          record.update!(status: "dead_letter", claim_token: nil, claim_expires_at: nil, last_error_code: "attempts_exhausted")
+          record.update!(status: "dead_letter", claim_token_digest: nil, claim_expires_at: nil, last_error_code: "attempts_exhausted")
           next nil
         end
         token = SecureRandom.hex(32)
+        token_digest = Digest::SHA256.hexdigest(token)
         number = record.attempt_count + 1
-        record.update!(status: "processing", claim_token: token, claim_expires_at: now + LEASE_SECONDS, attempt_count: number)
-        ProcessingAttempt.create!(event_id: id, shop_id: @shop_id, number: number, token: token, status: "processing", started_at: now)
+        record.update!(status: "processing", claim_token_digest: token_digest, claim_expires_at: now + LEASE_SECONDS, attempt_count: number)
+        ProcessingAttempt.create!(event_id: id, shop_id: @shop_id, number: number, token_digest: token_digest, status: "processing", started_at: now)
         Claim.new(event: persisted(record), token: token, attempt_number: number)
       end
     rescue StandardError
@@ -77,15 +79,16 @@ module EventLedger
 
     def acknowledge(claim, success:)
       raise ArgumentError unless claim.instance_of?(Claim) && claim.event.envelope.shop_id == @shop_id
+      token_digest = Digest::SHA256.hexdigest(claim.token)
       transaction do
         record = ReceivedEvent.lock.find_by(id: claim.event.event_id, shop_id: @shop_id)
-        next false unless record && record.status == "processing" && record.claim_token == claim.token
+        next false unless record && record.status == "processing" && record.claim_token_digest == token_digest
         now = Time.now.utc
         status = success ? "processed" : (record.attempt_count >= MAX_ATTEMPTS ? "dead_letter" : "retry_wait")
         error = success ? nil : "handler_failed"
-        record.update!(status: status, claim_token: nil, claim_expires_at: nil,
+        record.update!(status: status, claim_token_digest: nil, claim_expires_at: nil,
           completed_at: success ? now : nil, eligible_at: now + [ 2**record.attempt_count, 30 ].min, last_error_code: error)
-        ProcessingAttempt.where(event_id: record.id, shop_id: @shop_id, token: claim.token)
+        ProcessingAttempt.where(event_id: record.id, shop_id: @shop_id, token_digest: token_digest)
           .update_all(status: success ? "succeeded" : status, finished_at: now, error_code: error)
         true
       end
