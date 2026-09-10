@@ -12,6 +12,12 @@ module CommerceEventLedger
     def call(env)
       return @app.call(env) unless env.fetch("PATH_INFO", "").start_with?("/webhooks/shopify")
 
+      receive(env)
+    end
+
+    private
+
+    def receive(env)
       Rails.application.reloader.wrap do
         sources = Webhooks::ShopifySources.from_environment(environment: Rails.env.to_s)
         Webhooks::HttpReceiver.new(sources: sources, handler_name: Orders::Handler::NAME,

@@ -140,6 +140,14 @@ class WebhookReceiptTest < ActiveSupport::TestCase
     assert_equal 0, count
   end
 
+  test "duplicate JSON keys cannot leak input through parser warnings" do
+    output, errors = capture_io do
+      assert_equal 400, request(body: '{"synthetic-sensitive-key":1,"synthetic-sensitive-key":2}').first
+    end
+    assert_empty output
+    assert_empty errors
+  end
+
   test "the Rails request logger never sees capability URLs or raw webhook bodies" do
     output = StringIO.new
     previous_logger = Rails.logger

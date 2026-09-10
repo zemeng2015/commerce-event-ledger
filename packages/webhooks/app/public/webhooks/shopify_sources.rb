@@ -33,7 +33,8 @@ module Webhooks
     def self.from_environment(environment:, env: ENV)
       fixture = %w[development test].include?(environment)
       entries = if env.key?("LEDGER_SHOPIFY_SOURCES")
-        JSON.parse(env.fetch("LEDGER_SHOPIFY_SOURCES"), max_nesting: 8, create_additions: false)
+        JSON.parse(env.fetch("LEDGER_SHOPIFY_SOURCES"), object_class: UniqueJsonObject,
+          max_nesting: 8, create_additions: false, allow_duplicate_key: true)
       elsif fixture
         [{ "route_token" => "fixture", "shop_id" => 7,
           "shop_domain" => "commerce-event-ledger-fixture.myshopify.com",

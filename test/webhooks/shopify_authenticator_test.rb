@@ -19,7 +19,7 @@ class ShopifyAuthenticatorTest < ActiveSupport::TestCase
   end
 
   test "source configuration is explicit immutable and redacted and production fails closed" do
-    entry = { "route_token" => "a" * 64, "shop_id" => 7, "shop_domain" => "synthetic.myshopify.com", "secret" => "synthetic-secret" }
+    entry = { "route_token" => "a" * 64, "shop_id" => 7, "shop_domain" => "synthetic.myshopify.com", "secret" => "synthetic-secret".dup }
     registry = Webhooks::ShopifySources.new(entries: [entry])
     entry["secret"].replace("changed")
     assert_equal "synthetic-secret", registry.find(route_token: "a" * 64).secret
