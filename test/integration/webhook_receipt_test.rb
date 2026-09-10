@@ -217,6 +217,10 @@ class WebhookReceiptTest < ActiveSupport::TestCase
   def clear_receipts
     connection do |db|
       raise "Unsafe test database" unless db.select_value("SELECT DATABASE()") == "commerce_event_ledger_test"
+      db.execute("DELETE FROM solid_queue_jobs")
+      db.execute("DELETE FROM processing_attempts")
+      db.execute("DELETE FROM processed_effects")
+      db.execute("DELETE FROM order_projections")
       db.execute("DELETE FROM received_events")
       db.execute("DELETE FROM shops")
     end

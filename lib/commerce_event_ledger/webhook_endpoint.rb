@@ -21,7 +21,8 @@ module CommerceEventLedger
       Rails.application.reloader.wrap do
         sources = Webhooks::ShopifySources.from_environment(environment: Rails.env.to_s)
         Webhooks::HttpReceiver.new(sources: sources, handler_name: Orders::Handler::NAME,
-          handler_version: Orders::Handler::VERSION).call(env)
+          handler_version: Orders::Handler::VERSION,
+          enqueuer: ->(receipt) { ProcessEventJob.perform_later(receipt.shop_id, receipt.event_id) }).call(env)
       end
     rescue StandardError
       [ 503, { "content-type" => "application/json", "cache-control" => "no-store" },

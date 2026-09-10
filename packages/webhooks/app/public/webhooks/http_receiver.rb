@@ -6,10 +6,12 @@ module Webhooks
   class HttpReceiver
     MAX_BODY_BYTES = 1_048_576
 
-    def initialize(sources:, handler_name:, handler_version:)
+    def initialize(sources:, handler_name:, handler_version:, enqueuer:)
+      raise ArgumentError unless enqueuer.respond_to?(:call)
       @sources = sources
       @handler_name = handler_name
       @handler_version = handler_version
+      @enqueuer = enqueuer
     end
 
     def call(env)
@@ -32,6 +34,11 @@ module Webhooks
       envelope = ShopifyOrderCreate.new.call(raw_body: body, headers: headers, source_configuration: source)
       receipt = EventLedger::ReceiptStore.new(shop_id: source.shop_id, shop_domain: source.shop_domain)
         .receive(envelope: envelope, handler_name: @handler_name, handler_version: @handler_version)
+      begin
+        @enqueuer.call(receipt)
+      rescue StandardError
+        # The committed pending event remains eligible for scheduled recovery.
+      end
       [ 202, { "content-type" => "application/json", "cache-control" => "no-store" },
         [ JSON.generate(event_id: receipt.event_id, duplicate: receipt.duplicate) ] ]
     rescue ShopifyOrderCreate::NormalizationError

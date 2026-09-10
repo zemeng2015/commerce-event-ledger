@@ -71,6 +71,7 @@ jobs:
           bin/test
           bundle exec ruby script/check_coverage.rb
           bin/rails zeitwerk:check
+          ruby bin/jobs check
       - name: Verify package boundaries and enforcement
         run: |
           bundle exec packwerk validate
@@ -118,6 +119,7 @@ jobs:
           docker compose run --rm app ruby script/check_coverage.rb
           curl --fail --silent --show-error http://127.0.0.1:3000/up
           docker compose exec -T app ruby bin/publish_fixture --count 10
+          docker compose exec -T app ruby bin/rails runner script/check_order_demo.rb
       - name: Verify the fixture user cannot access a wildcard-similar database
         run: |
           docker compose exec -T db sh -c 'MYSQL_PWD="$MYSQL_ROOT_PASSWORD" mysql --user=root --execute="CREATE DATABASE commerceXeventXledgerXtest"'
