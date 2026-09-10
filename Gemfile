@@ -43,4 +43,4 @@ gem "solid_queue", "~> 1.7"
 gem "graphql", "~> 2.6"
 gem "packwerk", "~> 3.3", group: :development
 gem "packwerk-extensions", "~> 0.3.0", group: :development, require: false
-gem "simplecov", "~> 0.22", group: :test, require: false
+gem "simplecov", "~> 1.2", group: :test, require: false
