@@ -24,7 +24,7 @@ module Webhooks
       return response(401, "unauthorized") unless headers["X-SHOPIFY-SHOP-DOMAIN"] == source.shop_domain
       length = env["CONTENT_LENGTH"]
       return response(413, "body_too_large") if length && length.to_i > MAX_BODY_BYTES
-      body = env.fetch("rack.input").read(MAX_BODY_BYTES + 1)
+      body = env.fetch("rack.input").read(MAX_BODY_BYTES + 1) || "".b
       return response(413, "body_too_large") if body.bytesize > MAX_BODY_BYTES
       unless ShopifyAuthenticator.new.call(raw_body: body, headers: headers, source_configuration: source)
         return response(401, "unauthorized")

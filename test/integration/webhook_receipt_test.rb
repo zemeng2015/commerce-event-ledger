@@ -64,6 +64,7 @@ class WebhookReceiptTest < ActiveSupport::TestCase
       assert_equal 401, request(signature: signature).first
     end
     assert_equal 401, request(body: @body + " ", signature: sign(@body)).first
+    assert_equal 401, request(body: "", signature: nil).first
     assert_equal 0, count
     assert_equal 0, connection { |db| db.select_value("SELECT COUNT(*) FROM shops") }
   end
@@ -155,6 +156,7 @@ class WebhookReceiptTest < ActiveSupport::TestCase
     assert_equal 400, request(body: "{bad-json").first
     assert_equal 400, request(topic: "orders/updated").first
     assert_equal 413, request(body: "x" * 1_048_577).first
+    assert_equal 413, request(body: "x" * 1_048_577, without_content_length: true).first
     assert_equal 405, request(method: "GET").first
     ENV["LEDGER_SHOPIFY_SOURCES"] = "not-json-secret-marker"
     status, _, body = request
@@ -185,8 +187,9 @@ class WebhookReceiptTest < ActiveSupport::TestCase
   private
 
   def request(body: @body, signature: sign(body), path: "/webhooks/shopify/fixture", method: "POST",
-    domain: @headers.fetch("X-Shopify-Shop-Domain"), event_id: @headers.fetch("X-Shopify-Event-Id"), topic: "orders/create")
+    domain: @headers.fetch("X-Shopify-Shop-Domain"), event_id: @headers.fetch("X-Shopify-Event-Id"), topic: "orders/create", without_content_length: false)
     env = Rack::MockRequest.env_for(path, method: method, input: body)
+    env.delete("CONTENT_LENGTH") if without_content_length
     @headers.each { |key, value| env["HTTP_#{key.upcase.tr('-', '_')}"] = value }
     env["HTTP_X_SHOPIFY_SHOP_DOMAIN"] = domain
     env["HTTP_X_SHOPIFY_EVENT_ID"] = event_id
