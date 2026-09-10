@@ -20,6 +20,16 @@ module EventLedger
       version = Contract.text(handler_version)
       raise ArgumentError unless name.bytesize <= 64 && version.bytesize <= 64
 
+      retry_deadlocks { persist(envelope, name, version) }
+    rescue IdentityConflict
+      raise IdentityConflict, "Canonical event identity conflict", cause: nil
+    rescue StandardError
+      raise StorageError, "Webhook storage unavailable", cause: nil
+    end
+
+    private
+
+    def persist(envelope, name, version)
       ReceivedEvent.connection_pool.with_connection do |connection|
         # A nested transaction would let callers acknowledge an uncommitted receipt.
         raise StorageError if connection.transaction_open?
@@ -47,13 +57,21 @@ module EventLedger
         end
         Receipt.new(event_id: event_id, shop_id: @shop_id, duplicate: duplicate)
       end
-    rescue IdentityConflict
-      raise IdentityConflict, "Canonical event identity conflict", cause: nil
-    rescue StandardError
-      raise StorageError, "Webhook storage unavailable", cause: nil
     end
 
-    private
+    def retry_deadlocks
+      attempts = 0
+      begin
+        yield
+      rescue ActiveRecord::Deadlocked
+        attempts += 1
+        raise if attempts >= 5
+        # MySQL has rolled back the whole transaction. Retry from a new
+        # transaction; never resume a statement in the aborted savepoint.
+        sleep(0.005 * attempts)
+        retry
+      end
+    end
 
     def canonical_attributes(envelope)
       { topic: envelope.topic, subject_id: envelope.subject_id,
